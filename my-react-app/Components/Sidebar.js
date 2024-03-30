@@ -1,5 +1,5 @@
 import React from 'react';
-import './Sidebar.css';
+import './Components/Sidebar.css';
 
  // Import your sidebar styling
 
