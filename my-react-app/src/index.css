@@ -1,13 +1,40 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* index.css */
+
+
+.dashboard {
+  
+  flex-direction: row; /* Change to row to align components horizontally */
+  height: 100vh; /* Adjusts to full viewport height */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+
+
+
+
+.navbar-menu {
+  list-style-type: none;
+  padding: 0;
 }
+
+.navbar-menu li {
+  margin-bottom: 10px;
+}
+
+.navbar-menu li a {
+  color: #efe3e3; /* Sidebar menu link color */
+  text-decoration: none;
+}
+
+.navbar-menu li a:hover {
+  text-decoration: underline;
+}
+
+
+/* index.css */
+
+.navbar-logo {
+  width: 50px; /* Adjust the width as needed */
+  height: auto; /* Maintain aspect ratio */
+  margin-right: 10px; /* Add spacing between logo and menu items */
+}
+/* Add styles for header */

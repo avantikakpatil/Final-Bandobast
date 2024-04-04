@@ -5,7 +5,7 @@ class MainContent extends React.Component {
     return (
       <div className="main-content">
         <h2>Main Content</h2>
-        {/* Add charts, data tables, or other main content here */}
+        {/* Add your main content here */}
       </div>
     );
   }
