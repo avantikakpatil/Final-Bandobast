@@ -23,27 +23,33 @@ body, html {
 }
 
 .navbar {
-  background-color: #333; /* Navbar background color */
+  background-color: #c5c5c5; /* Navbar background color */
   color: white; /* Navbar text color */
-  width: 50px; /* Fixed width for the navbar */
+  width: 50px; 
+  border: #6c94f2;
+  border-width: 3px;
 }
 
 .sidebar {
   background-color: #f4f4f4; /* Sidebar background color */
   width: 300px; /* Fixed width for the sidebar */
+  margin-left: 30%;
 }
 
 .main-content {
-  padding: 10px;
+  padding: 5px;
   flex-grow: 1;
+  
+  
 }
 
 /* Header styles */
 .header {
-  background-color: #333; /* Background color of the header */
+  background-color: #6c94f2; /* Background color of the header */
   color: white; /* Text color of the header */
   height: 30px; /* Height of the header */
   padding-bottom: 10px;
+  padding: 0%;
 }
 
 .navbar-menu {
@@ -53,6 +59,7 @@ body, html {
 
 .navbar-menu li {
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .navbar-menu li a {
@@ -65,12 +72,11 @@ body, html {
 }
 
 
-/* index.css */
 
-.navbar-logo {
-  width: 50px; /* Adjust the width as needed */
-  height: auto; /* Maintain aspect ratio */
-  margin-right: 10px; /* Add spacing between logo and menu items */
+.navbar-icon {
+  width: 40px; /* Adjust the width as needed */
+  height: auto;
+  align-content: center;
 }
 /* Add styles for header */
 

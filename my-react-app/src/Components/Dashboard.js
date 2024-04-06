@@ -11,8 +11,9 @@ class Dashboard extends React.Component {
         <div className="dashboard">
           <Navbar />
           <div className="content">
+          <MainContent />
             <Sidebar />
-            <MainContent />
+            
           </div>
         </div>
       </div>

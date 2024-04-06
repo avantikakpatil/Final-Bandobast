@@ -1,24 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-
-class Sidebar extends React.Component {
-  render() {
-    return (
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2>Sidebar</h2>
-        </div>
-       
-        <div className="navbar-footer">
-         
-        </div>
-      </div>
-    );
-  }
-}
-///hhuhu
-export default Sidebar;
-=======
 import React from 'react';
 
 class Sidebar extends React.Component {
@@ -66,4 +45,3 @@ class Sidebar extends React.Component {
 }
 
 export default Sidebar;
->>>>>>> 5ef6ef07d62302133e8748a79ef5312ab6f86a6b

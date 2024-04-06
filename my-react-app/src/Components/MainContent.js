@@ -1,14 +1,12 @@
 import React from 'react';
+import Map from './Map';
 
-class MainContent extends React.Component {
-  render() {
-    return (
-      <div className="main-content">
-        <h2>Main Content</h2>
-        {/* Add your main content here */}
-      </div>
-    );
-  }
-}
+const MainContent = () => {
+  return (
+    <div class='main-content'>
+      <Map />
+    </div>
+  );
+};
 
 export default MainContent;

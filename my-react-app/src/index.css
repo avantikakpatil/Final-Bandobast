@@ -3,7 +3,7 @@
 
 .dashboard {
   
-  flex-direction: row; /* Change to row to align components horizontally */
+  /* Change to row to align components horizontally */
   height: 100vh; /* Adjusts to full viewport height */
 }
 
