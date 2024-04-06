@@ -9,10 +9,10 @@ class Navbar extends React.Component {
       <div className="navbar">
         
         <ul className="navbar-menu">
-          <li><img src={logo} alt="Home" className="navbar-icon" /><a href="#">Home</a></li>
-          <li><img src={logo1} alt="About" className="navbar-icon" /><a href="#">About</a></li>
-          <li><img src={logo2} alt="Services" className="navbar-icon" /><a href="#">Services</a></li>
-          <li><img src={logo3} alt="Contact" className="navbar-icon" /><a href="#">Contact</a></li>
+          <li><img src={logo} alt="Home" className="navbar-icon" /><a href="#"><h6>Home</h6></a></li>
+          <li><img src={logo1} alt="About" className="navbar-icon" /><a href="#"><h6>sector</h6></a></li>
+          <li><img src={logo2} alt="Services" className="navbar-icon" /><a href="#"><h6>Monitor</h6></a></li>
+          <li><img src={logo3} alt="Contact" className="navbar-icon" /><a href="#"><h6>Report</h6></a></li>
         </ul>
       </div>
     );

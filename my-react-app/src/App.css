@@ -55,15 +55,16 @@ body, html {
 .navbar-menu {
   list-style-type: none;
   padding: 0;
+  margin-bottom: 10px;
 }
 
 .navbar-menu li {
-  margin-bottom: 10px;
+ 
   text-align: center;
 }
 
 .navbar-menu li a {
-  color: #efe3e3; /* Sidebar menu link color */
+  color: #0a0a0a; /* Sidebar menu link color */
   text-decoration: none;
 }
 
