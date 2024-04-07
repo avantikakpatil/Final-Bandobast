@@ -1,0 +1,26 @@
+/* Add your custom styles for the map component here */
+
+#map {
+    width: 100%;
+    height: calc(100vh - 100px);
+  }
+  
+  .coordinates-display {
+    font-size: 14px;
+    height: 10px;
+  }
+  
+  .leaflet-control-geocoder.leaflet-bar {
+    margin-top: 10px;
+    background: white;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  #search-container {
+    margin-top: 10px;
+  }
+  
+  
+  /* Add any additional styles as needed */

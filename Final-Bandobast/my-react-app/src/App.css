@@ -1,0 +1,83 @@
+/* App.css */
+
+body, html {
+  margin: 0;
+  padding: 0;
+
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dashboard {
+  display: flex;
+  flex: 1;
+}
+
+.content {
+  display: flex;
+  flex: 1; /* Fill remaining space */
+}
+
+.navbar {
+  background-color: #c5c5c5; /* Navbar background color */
+  color: white; /* Navbar text color */
+  width: 50px; 
+  border: #6c94f2;
+  border-width: 3px;
+}
+
+.sidebar {
+  background-color: #f4f4f4; /* Sidebar background color */
+  width: 300px; /* Fixed width for the sidebar */
+  margin-left: 30%;
+}
+
+.main-content {
+  padding: 5px;
+  flex-grow: 1;
+  
+  
+}
+
+/* Header styles */
+.header {
+  background-color: #6c94f2; /* Background color of the header */
+  color: white; /* Text color of the header */
+  height: 30px; /* Height of the header */
+  padding-bottom: 10px;
+  padding: 0%;
+}
+
+.navbar-menu {
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.navbar-menu li {
+ 
+  text-align: center;
+}
+
+.navbar-menu li a {
+  color: #0a0a0a; /* Sidebar menu link color */
+  text-decoration: none;
+}
+
+.navbar-menu li a:hover {
+  text-decoration: underline;
+}
+
+
+
+.navbar-icon {
+  width: 40px; /* Adjust the width as needed */
+  height: auto;
+  align-content: center;
+}
+/* Add styles for header */
+
