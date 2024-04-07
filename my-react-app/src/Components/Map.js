@@ -115,20 +115,8 @@ const Map = () => {
     <div>
       <div id="map" style={{ height: '600px' }}></div>
       <div className="coordinates-display"></div>
-      <form id="coordinatesForm">
-        <label htmlFor="latitude">Latitude:</label>
-        <input type="text" id="latitude" name="latitude" placeholder="Enter latitude" required />
-        <label htmlFor="longitude">Longitude:</label>
-        <input type="text" id="longitude" name="longitude" placeholder="Enter longitude" required />
-        <button type="button" onClick={addCoordinate}>Add Coordinate</button>
-        <button type="button" onClick={clearCoordinates}>Clear Coordinates</button>
-        <button type="button" onClick={checkPoint}>Check Point</button>
-        <p id="result"></p>
-      </form>
-      <div id="search-container">
-        {/* Leaflet Control Geocoder */}
-        <div id="geocoder" className="leaflet-control-geocoder leaflet-bar"></div>
-      </div>
+      
+      
     </div>
   );
 };

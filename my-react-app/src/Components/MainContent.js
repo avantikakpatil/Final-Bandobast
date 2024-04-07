@@ -3,11 +3,12 @@ import Map from './Map';
 
 const MainContent = () => {
   return (
-    <div class='main-content'>
-      <Map />
+    <div className='main-content'>
+      <div className='map-container'>
+        <Map />
+      </div>
     </div>
   );
 };
 
 export default MainContent;
-//
