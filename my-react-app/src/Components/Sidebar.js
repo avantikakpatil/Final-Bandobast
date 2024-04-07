@@ -18,6 +18,8 @@ class Sidebar extends React.Component {
     this.setState({ selectedSector: sector });
   }
 
+  
+
   render() {
     return (
       <div className="sidebar">

@@ -10,6 +10,7 @@ import $ from 'jquery';
 import './Map.css'; // Import your CSS file for styling if needed
 
 const Map = () => {
+  
   // Define variables outside the component
   let geofenceCoordinates = [];
   const drawnItems = new L.FeatureGroup();
