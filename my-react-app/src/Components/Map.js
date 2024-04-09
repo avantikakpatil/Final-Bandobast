@@ -64,7 +64,7 @@ const Map = () => {
   };
 
   useEffect(() => {
-    const map = L.map('map').setView([0, 0], 2);
+    const map = L.map('map').setView([20.5937, 78.9629], 5); // Set the initial view to India
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     map.addLayer(drawnItems);
@@ -83,6 +83,20 @@ const Map = () => {
       }
     });
     map.addControl(drawControl);
+
+    // Add search bar
+    const searchControl = L.Control.geocoder({
+      defaultMarkGeocode: false,
+      collapsed: true
+    });
+    searchControl.addTo(map);
+
+    // Event listener for search control
+    map.on('geocoder:markgeocode', function (event) {
+      const { center } = event.geocode;
+      map.setView([center.lat, center.lng], 7); // Set the map view to the selected location with a zoom level of 7
+    });
+
 
     map.on(L.Draw.Event.CREATED, function (event) {
       const layer = event.layer;
