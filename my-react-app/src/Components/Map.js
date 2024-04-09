@@ -6,8 +6,7 @@ import 'leaflet-draw/dist/leaflet.draw.js';
 import 'leaflet-pip/leaflet-pip.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 
 const Map = () => {
   const mapRef = React.useRef();
@@ -24,12 +23,8 @@ const Map = () => {
   });
 
   useEffect(() => {
-<<<<<<< HEAD
-    const map = L.map('map').setView([20.5937, 78.9629], 5); // Set the initial view to India
-=======
     const map = L.map('map').setView([20.5937, 78.9629], 5); // Default view, zoomed out to India
     mapRef.current = map;
->>>>>>> 624b68cf6c3730436646788a1f4829fe5496c146
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -49,24 +44,6 @@ const Map = () => {
     });
     map.addControl(drawControl);
 
-<<<<<<< HEAD
-    // Add search bar
-    const searchControl = L.Control.geocoder({
-      defaultMarkGeocode: false,
-      collapsed: true
-    });
-    searchControl.addTo(map);
-
-    // Event listener for search control
-    map.on('geocoder:markgeocode', function (event) {
-      const { center } = event.geocode;
-      map.setView([center.lat, center.lng], 7); // Set the map view to the selected location with a zoom level of 7
-    });
-
-
-    map.on(L.Draw.Event.CREATED, function (event) {
-      const layer = event.layer;
-=======
     const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
       defaultMarkGeocode: false,
     }).addTo(map);
@@ -74,7 +51,6 @@ const Map = () => {
 
     map.on('draw:created', function (event) {
       const { layer } = event;
->>>>>>> 624b68cf6c3730436646788a1f4829fe5496c146
       drawnItems.addLayer(layer);
       setDrawnLayer(layer);
       setShowForm(true);
