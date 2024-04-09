@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -6,78 +6,55 @@ import 'leaflet-draw/dist/leaflet.draw.js';
 import 'leaflet-pip/leaflet-pip.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
-import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import './Map.css';
 
 const Map = () => {
-  const [geofenceCoordinates, setGeofenceCoordinates] = React.useState([]);
-  const drawnItemsRef = React.useRef();
-  const [modalOpen, setModalOpen] = React.useState(false);
+  const mapRef = React.useRef();
+  const [searchControl, setSearchControl] = React.useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [drawnLayer, setDrawnLayer] = useState(null);
+  const [bandobastDetails, setBandobastDetails] = useState({
+    // Initialize with default values for the form fields
+    // You can modify this object based on your requirements
+    title: '',
+    description: '',
+    startTime: '',
+    endTime: '',
+  });
 
   useEffect(() => {
-    const map = L.map('map').setView([20.5937, 78.9629], 5); // Zoom map to India
+    const map = L.map('map').setView([20.5937, 78.9629], 5); // Default view, zoomed out to India
+    mapRef.current = map;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    drawnItemsRef.current = new L.FeatureGroup();
-    map.addLayer(drawnItemsRef.current);
-
-    // Define custom marker icon
-    const markerIcon = L.icon({
-      iconUrl: 'marker-icon.png', // Provide the URL of your custom marker icon
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      tooltipAnchor: [16, -28],
-      shadowSize: [41, 41],
-    });
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
 
     const drawControl = new L.Control.Draw({
       draw: {
         rectangle: true,
-        marker: {
-          icon: markerIcon, // Use custom marker icon
-        },
+        polygon: true,
+        marker: true,
       },
       edit: {
-        featureGroup: drawnItemsRef.current,
+        featureGroup: drawnItems,
         remove: true,
       },
     });
     map.addControl(drawControl);
 
-    // Add search bar
-    L.Control.geocoder({
-      position: 'topright',
+    const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
       defaultMarkGeocode: false,
     }).addTo(map);
+    setSearchControl(searchControl);
 
-    map.on(L.Draw.Event.CREATED, function (event) {
-      const { layer, layerType } = event;
-      drawnItemsRef.current.addLayer(layer);
-
-      let coordinates;
-      if (layerType === 'rectangle' || layerType === 'polygon') {
-        coordinates = layer.getLatLngs()[0].map(point => [point.lat, point.lng]);
-      } else if (layerType === 'marker') {
-        const latlng = layer.getLatLng();
-        coordinates = [[latlng.lat, latlng.lng]];
-      }
-
-      setGeofenceCoordinates(coordinates);
-      setModalOpen(true);
-    });
-
-    map.on('mousemove', function (e) {
-      const lat = e.latlng.lat.toFixed(6);
-      const lng = e.latlng.lng.toFixed(6);
-      document.querySelector('.coordinates-display').innerHTML = `Coordinates: ${lat}, ${lng}`;
-    });
-
-    map.on('mouseout', function () {
-      document.querySelector('.coordinates-display').innerHTML = '';
+    map.on('draw:created', function (event) {
+      const { layer } = event;
+      drawnItems.addLayer(layer);
+      setDrawnLayer(layer);
+      setShowForm(true);
     });
 
     return () => {
@@ -85,61 +62,69 @@ const Map = () => {
     };
   }, []);
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-    const title = $('#name').val();
-    const date = $('#date').val();
-    const durationFrom = $('#durationFrom').val();
-    const durationTo = $('#durationTo').val();
-
-    const newRecord = {
-      title,
-      date,
-      durationFrom,
-      durationTo,
-    };
-
-    // Handle the new record, you can push it to an array or send it to a server
-
-    setModalOpen(false);
+  const handleSearch = (query) => {
+    if (searchControl) {
+      searchControl.geosearch(query);
+    }
   };
+
+  const handleSubmit = () => {
+    // Here you can handle the submission of the form data
+    console.log('Bandobast Details:', bandobastDetails);
+    // You may also want to clear the drawn layer and close the form modal
+    setDrawnLayer(null);
+    setShowForm(false);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setBandobastDetails(prevState => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const createSectorForm = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Create Sector Form</title>
+    </head>
+    <body>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Title</label>
+          <input type="text" name="title" value={bandobastDetails.title} onChange={handleInputChange} />
+        </div>
+        <div className="form-group">
+          <label>Description</label>
+          <textarea name="description" value={bandobastDetails.description} onChange={handleInputChange} />
+        </div>
+        <div className="form-group">
+          <label>Start Time</label>
+          <input type="datetime-local" name="startTime" value={bandobastDetails.startTime} onChange={handleInputChange} />
+        </div>
+        <div className="form-group">
+          <label>End Time</label>
+          <input type="datetime-local" name="endTime" value={bandobastDetails.endTime} onChange={handleInputChange} />
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+    </body>
+    </html>
+  `;
 
   return (
     <div>
       <div id="map" style={{ height: '600px' }} />
-      <div className="coordinates-display" />
-
-      <div id="form-container" className={`modal fade ${modalOpen ? 'show' : ''}`} tabIndex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden={!modalOpen}>
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="formModalLabel">Create Bandobast</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => setModalOpen(false)}>
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form id="firebaseForm" onSubmit={handleFormSubmit}>
-                <div className="form-group">
-                  <label htmlFor="name">Title of the Bandobast:</label>
-                  <input type="text" className="form-control" id="name" name="name" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="date">Date:</label>
-                  <input type="date" className="form-control" id="date" name="date" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="durationFrom">Duration From:</label>
-                  <input type="time" className="form-control" id="durationFrom" name="durationFrom" required />
-                  <label htmlFor="durationTo">Duration To:</label>
-                  <input type="time" className="form-control" id="durationTo" name="durationTo" required />
-                </div>
-                <button type="submit" className="btn btn-primary" id="form-container-submit">Submit</button>
-              </form>
-            </div>
-          </div>
-        </div>
+      <div className="search-bar">
+        <input type="text" placeholder="Search location..." onChange={(e) => handleSearch(e.target.value)} />
       </div>
+      {showForm && (
+        <div className="form-container" dangerouslySetInnerHTML={{ __html: createSectorForm }} />
+      )}
     </div>
   );
 };
