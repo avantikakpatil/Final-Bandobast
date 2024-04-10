@@ -8,7 +8,7 @@ import AddPersonnel from './Components/AddPersonnel';
 function App() {
   return (
     <div className="App">
-      <AddPersonnel />
+      <Dashboard />
     </div>
   );
 }
