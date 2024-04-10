@@ -7,15 +7,12 @@ import 'leaflet-pip/leaflet-pip.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
 
-
 const Map = () => {
   const mapRef = React.useRef();
   const [searchControl, setSearchControl] = React.useState(null);
+  const [drawnLayers, setDrawnLayers] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [drawnLayer, setDrawnLayer] = useState(null);
   const [bandobastDetails, setBandobastDetails] = useState({
-    // Initialize with default values for the form fields
-    // You can modify this object based on your requirements
     title: '',
     description: '',
     startTime: '',
@@ -23,7 +20,7 @@ const Map = () => {
   });
 
   useEffect(() => {
-    const map = L.map('map').setView([20.5937, 78.9629], 5); // Default view, zoomed out to India
+    const map = L.map('map').setView([20.5937, 78.9629], 5); 
     mapRef.current = map;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -35,6 +32,8 @@ const Map = () => {
       draw: {
         rectangle: true,
         polygon: true,
+        polyline: true,
+        circle: true,
         marker: true,
       },
       edit: {
@@ -50,10 +49,26 @@ const Map = () => {
     setSearchControl(searchControl);
 
     map.on('draw:created', function (event) {
-      const { layer } = event;
-      drawnItems.addLayer(layer);
-      setDrawnLayer(layer);
-      setShowForm(true);
+      const { layer, layerType } = event;
+
+      // Check the type of the drawn layer and handle accordingly
+      switch (layerType) {
+        case 'rectangle':
+        case 'polygon':
+        case 'polyline':
+        case 'circle':
+          drawnItems.addLayer(layer);
+          setDrawnLayers([...drawnLayers, layer]);
+          setShowForm(true);
+          break;
+        case 'marker':
+        case 'circlemarker':
+          drawnItems.addLayer(layer);
+          setDrawnLayers([...drawnLayers, layer]);
+          break;
+        default:
+          break;
+      }
     });
 
     return () => {
@@ -67,12 +82,16 @@ const Map = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Here you can handle the submission of the form data
+  const handleSubmit = (e) => {
+    e.preventDefault();
     console.log('Bandobast Details:', bandobastDetails);
-    // You may also want to clear the drawn layer and close the form modal
-    setDrawnLayer(null);
     setShowForm(false);
+    setBandobastDetails({
+      title: '',
+      description: '',
+      startTime: '',
+      endTime: '',
+    });
   };
 
   const handleInputChange = (e) => {
@@ -83,46 +102,36 @@ const Map = () => {
     }));
   };
 
-  const createSectorForm = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Create Sector Form</title>
-    </head>
-    <body>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Title</label>
-          <input type="text" name="title" value={bandobastDetails.title} onChange={handleInputChange} />
-        </div>
-        <div className="form-group">
-          <label>Description</label>
-          <textarea name="description" value={bandobastDetails.description} onChange={handleInputChange} />
-        </div>
-        <div className="form-group">
-          <label>Start Time</label>
-          <input type="datetime-local" name="startTime" value={bandobastDetails.startTime} onChange={handleInputChange} />
-        </div>
-        <div className="form-group">
-          <label>End Time</label>
-          <input type="datetime-local" name="endTime" value={bandobastDetails.endTime} onChange={handleInputChange} />
-        </div>
-        <button type="submit">Submit</button>
-      </form>
-    </body>
-    </html>
-  `;
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
 
   return (
-    <div>
-      <div id="map" style={{ height: '600px' }} />
-      <div className="search-bar">
-        <input type="text" placeholder="Search location..." onChange={(e) => handleSearch(e.target.value)} />
-      </div>
+    <div style={{ position: 'relative' }}>
+      <div id="map" style={{ height: '600px', position: 'relative' }} />
       {showForm && (
-        <div className="form-container" dangerouslySetInnerHTML={{ __html: createSectorForm }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '20px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
+          <button style={{ position: 'absolute', top: '10px', right: '10px', border: 'none', background: 'none', cursor: 'pointer' }} onClick={handleCloseForm}>X</button>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Title</label>
+              <input type="text" name="title" value={bandobastDetails.title} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea name="description" value={bandobastDetails.description} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Start Time</label>
+              <input type="datetime-local" name="startTime" value={bandobastDetails.startTime} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>End Time</label>
+              <input type="datetime-local" name="endTime" value={bandobastDetails.endTime} onChange={handleInputChange} />
+            </div>
+            <button type="submit">Submit</button>
+          </form>
+        </div>
       )}
     </div>
   );
