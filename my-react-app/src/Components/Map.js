@@ -14,10 +14,17 @@ const Map = () => {
   const [showForm, setShowForm] = useState(false);
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
-    description: '',
+    personnel: [],
+    date: '',
     startTime: '',
     endTime: '',
   });
+  const [newPersonnel, setNewPersonnel] = useState('');
+  const personnelOptions = [
+    { value: '1', label: 'John Doe' },
+    { value: '2', label: 'Jane Smith' },
+    { value: '3', label: 'Michael Brown' },
+  ];
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5); 
@@ -88,10 +95,12 @@ const Map = () => {
     setShowForm(false);
     setBandobastDetails({
       title: '',
-      description: '',
+      personnel: [],
+      date: '',
       startTime: '',
       endTime: '',
     });
+    setNewPersonnel('');
   };
 
   const handleInputChange = (e) => {
@@ -99,6 +108,14 @@ const Map = () => {
     setBandobastDetails(prevState => ({
       ...prevState,
       [name]: value,
+    }));
+  };
+
+  const handleSelectPersonnel = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setBandobastDetails(prevState => ({
+      ...prevState,
+      personnel: selectedOptions,
     }));
   };
 
@@ -111,25 +128,34 @@ const Map = () => {
       <div id="map" style={{ height: '600px', position: 'relative' }} />
       {showForm && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '20px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
-          <button style={{ position: 'absolute', top: '10px', right: '10px', border: 'none', background: 'none', cursor: 'pointer' }} onClick={handleCloseForm}>X</button>
+          <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={handleCloseForm}>×</button>
+          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Title</label>
-              <input type="text" name="title" value={bandobastDetails.title} onChange={handleInputChange} />
+              <label>Title of the Bandobast:</label>
+              <input type="text" name="title" value={bandobastDetails.title} onChange={handleInputChange} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
             <div className="form-group">
-              <label>Description</label>
-              <textarea name="description" value={bandobastDetails.description} onChange={handleInputChange} />
+              <label>Select the Ground Personnel:</label>
+              <select name="personnel" multiple value={bandobastDetails.personnel} onChange={handleSelectPersonnel} style={{ width: '100%', height: '100px', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }}>
+                {personnelOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
-              <label>Start Time</label>
-              <input type="datetime-local" name="startTime" value={bandobastDetails.startTime} onChange={handleInputChange} />
+              <label>Date:</label>
+              <input type="date" name="date" value={bandobastDetails.date} onChange={handleInputChange} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
             <div className="form-group">
-              <label>End Time</label>
-              <input type="datetime-local" name="endTime" value={bandobastDetails.endTime} onChange={handleInputChange} />
+              <label>Duration From:</label>
+              <input type="time" name="startTime" value={bandobastDetails.startTime} onChange={handleInputChange} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
-            <button type="submit">Submit</button>
+            <div className="form-group">
+              <label>Duration To:</label>
+              <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={handleInputChange} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
+            </div>
+            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Create Bandobast</button>
           </form>
         </div>
       )}
