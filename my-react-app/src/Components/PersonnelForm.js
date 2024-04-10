@@ -1,51 +1,32 @@
 import React, { useState } from 'react';
-import './AddPersonnel.css';
 
-const PersonnelForm = ({ onAddPersonnel }) => {
+const PersonnelForm = ({ onClose, onAddPersonnel }) => {
   const [name, setName] = useState('');
   const [designation, setDesignation] = useState('');
-  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name || !designation) return;
-    
-    // Create a new personnel object
-    const newPersonnel = {
-      id: Date.now(), // Generate a unique ID (in a real app, this might come from a database)
-      name,
-      designation
-    };
-
-    // Pass the new personnel object to the parent component
-    onAddPersonnel(newPersonnel);
-
-    // Clear the form fields
+    onAddPersonnel({ id: Date.now(), name, designation });
     setName('');
     setDesignation('');
-    // Close the form after submission
-    setIsFormOpen(false);
   };
 
   return (
-    <div className={`modal ${isFormOpen ? 'open' : ''}`}>
-      <div className="modal-content">
-        <button className="close-button" onClick={() => setIsFormOpen(false)}>X</button>
-        <h2>Add Personnel</h2>
+    <div className="popup">
+      <div className="popup-content">
+        <button className="close-button" onClick={onClose}>X</button>
+        <h3>Add Personnel</h3>
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Designation"
-            value={designation}
-            onChange={(e) => setDesignation(e.target.value)}
-          />
-          <button type="submit">Add Personnel</button>
+          <div className="form-group">
+            <label htmlFor="name">Name:</label>
+            <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="designation">Designation:</label>
+            <input type="text" id="designation" value={designation} onChange={(e) => setDesignation(e.target.value)} />
+          </div>
+          <button type="submit">Submit</button>
         </form>
       </div>
     </div>
