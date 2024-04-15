@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { db } from '../config/firebaseConfig';
+import { ref, push } from 'firebase/database'; 
 
 const PersonnelForm = ({ onClose, addPersonnel }) => {
   const [formData, setFormData] = useState({
@@ -12,10 +14,20 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    addPersonnel(formData); // Call the function to add personnel
-    onClose(); // Close the form
+    addPersonnel(formData); 
+
+    try {
+      const personnelRef = ref(db, 'personnel'); 
+      await push(personnelRef, formData); 
+
+     
+      console.log('Data saved successfully!');
+  } catch (error) {
+      console.error('Error saving personnel data:', error);
+  }
+    onClose(); // Closes the form
   };
 
   return (
