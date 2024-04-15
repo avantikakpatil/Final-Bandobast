@@ -34,7 +34,7 @@
 
 .content .popup-content {
   background-color: white;
-  padding: 40px; /* Increase padding for larger size */
+  padding: 60px; /* Increase padding for larger size */
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
