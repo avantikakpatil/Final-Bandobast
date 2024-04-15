@@ -26,7 +26,14 @@ const AddPersonnel = () => {
         <div className="content">
           <PersonnelList personnelList={personnelList} /> {/* Render the personnel list component */}
           <button className="add-button" onClick={toggleForm}>Add Officer</button> {/* Button to toggle the form */}
-          {isFormOpen && <PersonnelForm onClose={() => setIsFormOpen(false)} addPersonnel={addPersonnel} />} {/* Render the form component if isFormOpen is true */}
+          {isFormOpen && (
+            <div className="popup">
+              <div className="popup-content">
+                <button className="close-button" onClick={() => setIsFormOpen(false)}>×</button> {/* Close button */}
+                <PersonnelForm onClose={() => setIsFormOpen(false)} addPersonnel={addPersonnel} /> {/* Render the form component */}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

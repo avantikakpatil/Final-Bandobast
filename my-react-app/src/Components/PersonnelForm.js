@@ -1,35 +1,58 @@
 import React, { useState } from 'react';
 
-const PersonnelForm = ({ onClose, onAddPersonnel }) => {
-  const [name, setName] = useState('');
-  const [designation, setDesignation] = useState('');
+const PersonnelForm = ({ onClose, addPersonnel }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    position: '',
+    email: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !designation) return;
-    onAddPersonnel({ id: Date.now(), name, designation });
-    setName('');
-    setDesignation('');
+    addPersonnel(formData); // Call the function to add personnel
+    onClose(); // Close the form
   };
 
   return (
-    <div className="popup">
-      <div className="popup-content">
-        <button className="close-button" onClick={onClose}>X</button>
-        <h3>Add Personnel</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Name:</label>
-            <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label htmlFor="designation">Designation:</label>
-            <input type="text" id="designation" value={designation} onChange={(e) => setDesignation(e.target.value)} />
-          </div>
-          <button type="submit">Submit</button>
-        </form>
+    <form className="form" onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label>Name:</label>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
       </div>
-    </div>
+      <div className="form-group">
+        <label>Position:</label>
+        <input
+          type="text"
+          name="position"
+          value={formData.position}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label>Email:</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <button type="submit">Submit</button>
+      <button type="button" onClick={onClose}>Close</button>
+    </form>
   );
 };
 
