@@ -15,7 +15,8 @@ const Map = () => {
   const mapRef = React.useRef();
   const [searchControl, setSearchControl] = useState(null);
   const [drawnLayers, setDrawnLayers] = useState([]);
- 
+  const [latLng, setLatLng] = useState({ lat: 0, lng: 0 });
+
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
     personnel: [],
@@ -86,10 +87,22 @@ const Map = () => {
       }
     });
 
+    map.on('mousemove', function (e) {
+      setLatLng({ lat: e.latlng.lat.toFixed(4), lng: e.latlng.lng.toFixed(4) });
+    });
+
     return () => {
       map.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = 'hidden'; // Prevent scrolling when form is open
+    } else {
+      document.body.style.overflow = ''; // Allow scrolling when form is closed
+    }
+  }, [showForm]);
 
   const handleSearch = (query) => {
     if (searchControl) {
@@ -137,40 +150,45 @@ const Map = () => {
   return (
     <div style={{ position: 'relative' }}>
       <div id="map" style={{ height: '600px', position: 'relative' }} />
+      <div style={{ position: 'absolute', bottom: '10px', right: '10px', backgroundColor: 'white', padding: '0px 5px 0px 5px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
+        <p>Latitude: {latLng.lat}, Longitude: {latLng.lng}</p>
+      </div>
       {showForm && (
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '20px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
-          <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={() => setShowForm(false)}>×</button>
-          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Title of the Bandobast:</label>
-              <input type="text" name="title" value={bandobastDetails.title} onChange={(e) => setBandobastDetails({ ...bandobastDetails, title: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
-            </div>
-            <div className="form-group">
-              <label>Select the Ground Personnel:</label>
-              <select name="personnel" multiple value={bandobastDetails.personnel} onChange={handleSelectPersonnel} style={{ width: '100%', height: '100px', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }}>
-                {personnelOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Date:</label>
-              <input type="date" name="date" value={bandobastDetails.date} onChange={(e) => setBandobastDetails({ ...bandobastDetails, date: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
-            </div>
-            <div className="form-group">
-              <label>Duration From:</label>
-              <input type="time" name="startTime" value={bandobastDetails.startTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, startTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
-            </div>
-            <div className="form-group">
-              <label>Duration To:</label>
-              <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
-            </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
-          </form>
-        </div>
+        <>
+          <div className="overlay"></div>
+          <div style={{ position: 'absolute', margin: '10px 30px 20px 40px', width: '55%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '10px 120px 10px 120px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
+            <button style={{ position: 'absolute', margin: '10px', top: '5px', right: '2px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={() => setShowForm(false)}>×</button>
+            <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Title of the Bandobast:</label>
+                <input type="text" name="title" value={bandobastDetails.title} onChange={(e) => setBandobastDetails({ ...bandobastDetails, title: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
+              </div>
+              <div className="form-group">
+                <label>Select the Ground Personnel:</label>
+                <select name="personnel" multiple value={bandobastDetails.personnel} onChange={handleSelectPersonnel} style={{ width: '100%', height: '100px', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }}>
+                  {personnelOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Date:</label>
+                <input type="date" name="date" value={bandobastDetails.date} onChange={(e) => setBandobastDetails({ ...bandobastDetails, date: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
+              </div>
+              <div className="form-group">
+                <label>Duration From:</label>
+                <input type="time" name="startTime" value={bandobastDetails.startTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, startTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
+              </div>
+              <div className="form-group">
+                <label>Duration To:</label>
+                <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
+              </div>
+              <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
+            </form>
+          </div>
+        </>
       )}
-     
     </div>
   );
 };
