@@ -1,0 +1,52 @@
+/* Add your custom styles for the map component here */
+
+#map {
+  position: relative; /* Ensure the map container has a position */
+  width: 100%;
+  height: calc(100vh - 100px);
+}
+
+.coordinates-display {
+  font-size: 14px;
+  height: 10px;
+}
+
+.leaflet-control-geocoder.leaflet-bar {
+  margin-top: 10px;
+  background: white;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+#search-container {
+  margin-top: 10px;
+}
+
+/* Add styles for the modal */
+.ReactModal__Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+  z-index: 1000; /* Higher z-index for the modal overlay */
+}
+
+.ReactModal__Content {
+  position: absolute;
+  top: 50%; /* Center the modal vertically */
+  left: 50%; /* Center the modal horizontally */
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 1001; /* Higher z-index for the modal content */
+}
+
+/* Ensure that map doesn't block interaction with the modal */
+.modal-open #map {
+  pointer-events: none;
+}

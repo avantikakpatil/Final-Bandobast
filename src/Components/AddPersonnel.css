@@ -1,0 +1,76 @@
+/* AddPersonnel.css */
+
+.content {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.content .add-button {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 30px; /* Adjusted padding for larger size */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  height: 50px;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.content .popup {
+  display: none; /* Initially hide the popup */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content .popup-content {
+  background-color: white;
+  padding: 60px; /* Increase padding for larger size */
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.content .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.content .form-group {
+  margin-bottom: 20px;
+}
+
+.content .form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.content .form-group input {
+  width: 100%;
+  padding: 15px; /* Increase padding for larger size */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.content .form-group button {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 30px; /* Adjusted padding for larger size */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
