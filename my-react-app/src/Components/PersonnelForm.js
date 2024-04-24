@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { db } from '../config/firebaseConfig';
 import { ref, push } from 'firebase/database'; 
+import './PersonnelForm.css'
 
 const PersonnelForm = ({ onClose, addPersonnel }) => {
   const [formData, setFormData] = useState({
     name: '',
     position: '',
     email: '',
+    latitude: '', 
+    longitude: '' 
   });
 
   const handleChange = (e) => {
@@ -22,12 +25,11 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
       const personnelRef = ref(db, 'personnel'); 
       await push(personnelRef, formData); 
 
-     
       console.log('Data saved successfully!');
-  } catch (error) {
+    } catch (error) {
       console.error('Error saving personnel data:', error);
-  }
-    onClose(); // Closes the form
+    }
+    onClose(); 
   };
 
   return (
@@ -62,7 +64,29 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
           required
         />
       </div>
+      <div className="form-group">
+        <label>Latitude:</label>
+        <input
+          type="text" 
+          name="latitude" 
+          value={formData.latitude}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label>Longitude:</label>
+        <input
+          type="text" 
+          name="longitude" 
+          value={formData.longitude}
+          onChange={handleChange}
+          required
+        />
+      </div>
       <button type="submit">Submit</button>
+      <br/>
+      <br/>
       <button type="button" onClick={onClose}>Close</button>
     </form>
   );
