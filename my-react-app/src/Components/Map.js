@@ -211,7 +211,7 @@ const Map = () => {
     <div style={{ position: 'relative' }}>
       <div id="map" style={{ height: '600px', position: 'relative' }} />
       {showForm && (
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '20px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
+        <div style={{ position: 'absolute', top: '50%', margin: '10px 30px 20px 40px', width: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '20px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
           <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={() => setShowForm(false)}>×</button>
           <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
           <form onSubmit={handleSubmit}>
@@ -240,6 +240,11 @@ const Map = () => {
               <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
             <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
+            <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
+  <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={() => setShowForm(false)}>×</button>
+</div>
+
+
           </form>
         </div>
       )}
