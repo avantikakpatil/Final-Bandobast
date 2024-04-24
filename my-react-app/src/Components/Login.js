@@ -6,6 +6,7 @@ import { database } from '../config/firebaseConfig';
 
 export const Login = () => {
   const [login, setLogin] = useState(false);
+  const [role, setRole] = useState('admin'); // Initialize the role state
   const history = useHistory();
 
   const handleSubmit = (e) => {
@@ -43,9 +44,19 @@ export const Login = () => {
       </div>
       <h1>{login ? 'SignIn' : 'SignUp'}</h1>
       <form onSubmit={(e) => handleSubmit(e)}>
-        <input name='email' placeholder='Email' /> <br />
-        <input name='password' type="password" placeholder='Password' /><br /><br />
+        <input name='email' placeholder='Email' className='input_box' /> <br />
+        <input name='password' type="password" placeholder='Password'className='input_box' /><br /><br />
         <button>{login ? 'SignIn' : 'SignUp'}</button>
+        <br />
+        <br />
+        <div className='second_row'>
+        <div className='role-selection'>
+          <input type="radio" id="admin" name="role" value="admin" checked={role === 'admin'} onChange={() => setRole('admin')} />
+          <label htmlFor="admin">Admin</label>
+          <input type="radio" id="supervisor" name="role" value="supervisor" checked={role === 'supervisor'} onChange={() => setRole('supervisor')} />
+          <label htmlFor="supervisor">Supervisor</label>
+        </div>
+        </div>
       </form>
     </div>
   );
