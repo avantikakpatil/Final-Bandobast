@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const PersonnelList = () => {
-  const [personnelList, setPersonnelList] = useState([]);
-
+const PersonnelList = ({ personnelList }) => {
   return (
-    <div>
-      <h2>Personnel List</h2>
-      <ul>
-        {personnelList.map(personnel => (
-          <li key={personnel.id}>
-            {personnel.name} - {personnel.designation}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <div className="personnel-list">
+    <h2>Personnel List</h2>
+    {personnelList.map((personnel, index) => (
+      <div key={personnel.id} className="personnel-item">
+        <p><strong>{index + 1}. Name:</strong> {personnel.name}</p>
+        <p><strong>Position:</strong> {personnel.position}</p>
+        <p><strong>Email:</strong> {personnel.email}</p>
+      </div>
+    ))}
+  </div>
+
   );
 };
 
