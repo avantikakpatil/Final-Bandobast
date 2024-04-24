@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header'; // Import the Header component
 import Navbar from './Navbar'; // Import the Navbar component
 import PersonnelForm from './PersonnelForm'; // Import the PersonnelForm component
 import PersonnelList from './PersonnelList'; // Import the PersonnelList component
 import './AddPersonnel.css'; // Import your CSS file for styling if needed
+import { db } from '../config/firebaseConfig'; // Import your Firebase configuration
+import { ref, onValue } from 'firebase/database';
 
 const AddPersonnel = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [personnelList, setPersonnelList] = useState([]);
+
+  useEffect(() => {
+    const personnelRef = ref(db, 'personnel'); // Assuming 'personnel' is your Firebase database node
+    onValue(personnelRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const personnelData = Object.values(data); // Convert the object of personnel to an array
+        setPersonnelList(personnelData);
+      }
+    });
+  }, []); // Empty dependency array ensures the effect runs only once, equivalent to componentDidMount
 
   const toggleForm = () => {
     setIsFormOpen(!isFormOpen);

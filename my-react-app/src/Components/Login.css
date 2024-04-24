@@ -1,0 +1,61 @@
+.app {
+    margin-top: 9%;
+    margin-left: 38%;
+    max-width: 400px;
+    padding-right: 4px;
+    padding: 45px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  h1{
+   text-align: center;
+  }
+  .second_row{
+    justify-content: space-between;
+  }
+
+  .row {
+    display: flex;
+    justify-content:space-around;
+    margin-bottom: 20px;
+    padding-right: 25px;
+  }
+  
+  .activeColor {
+    color: blue; 
+    cursor: pointer;
+  }
+  
+  .pointer {
+    cursor: pointer;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 9%;
+  }
+  
+  .input_box {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3; 
+  }
+  
+  
