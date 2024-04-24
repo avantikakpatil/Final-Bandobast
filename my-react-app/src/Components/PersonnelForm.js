@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../config/firebaseConfig';
 import { ref, push } from 'firebase/database'; 
-import './PersonnelForm.css'
+
 
 const PersonnelForm = ({ onClose, addPersonnel }) => {
   const [formData, setFormData] = useState({

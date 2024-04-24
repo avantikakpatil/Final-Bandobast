@@ -4,7 +4,7 @@ import { db } from '../config/firebaseConfig';
 import { ref, onValue } from 'firebase/database';
 import saveFormDataToDatabase from '../config/saveFormDataToDatabase';
 
-// Import your custom marker icon image
+import customPersonnelIcon from '../maps-flags_447031.png';
 import customMarkerIcon from '../maps-flags_447031.png';
 
 import 'leaflet/dist/leaflet.css';
@@ -29,6 +29,7 @@ const Map = () => {
   const [loader, setLoader] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
+  const [personnelMarkers, setPersonnelMarkers] = useState([]);
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -89,7 +90,7 @@ const Map = () => {
           break;
       }
     });
-    
+
     const personnelRef = ref(db, 'personnel');
     onValue(personnelRef, (snapshot) => {
       const personnelData = snapshot.val();
@@ -116,10 +117,52 @@ const Map = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoader(true);
-
+  
     try {
-      await saveFormDataToDatabase(bandobastDetails);
+      // Fetch location of selected personnel
+      const personnelLocations = await Promise.all(
+        bandobastDetails.personnel.map(async (personnelId) => {
+          const personnelRef = ref(db, `personnel/${personnelId}`);
+          let personnelData;
+          await onValue(personnelRef, (snapshot) => {
+            personnelData = snapshot.val();
+          });
+          return {
+            id: personnelId,
+            location: {
+              latitude: personnelData.latitude,
+              longitude: personnelData.longitude
+            }
+          };
+        })
+      );
+  
+      // Get coordinates from drawn layers
+      const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
+  
+      // Update bandobastDetails with personnel locations and coordinates
+      const updatedBandobastDetails = {
+        ...bandobastDetails,
+        personnel: personnelLocations,
+        coordinates: coordinates
+      };
+  
+      // Save updated data to the database
+      await saveFormDataToDatabase(updatedBandobastDetails);
 
+      const personnelIcon = L.icon({
+        iconUrl: customPersonnelIcon,
+        iconSize: [22, 22],
+        iconAnchor: [16, 32],
+      });
+  
+      // Display personnel markers on the map
+      const newPersonnelMarkers = personnelLocations.map(({ id, location }) => {
+        const marker = L.marker([location.latitude, location.longitude], { icon: personnelIcon }).addTo(mapRef.current).bindPopup(`Personnel ${id}`);
+        return marker;
+      });
+      setPersonnelMarkers(newPersonnelMarkers);
+  
       // Reset the form data and loader state
       setShowForm(false);
       setLoader(false);
