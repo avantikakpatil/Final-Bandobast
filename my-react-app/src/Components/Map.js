@@ -4,6 +4,9 @@ import { db } from '../config/firebaseConfig';
 import { ref, onValue } from 'firebase/database';
 import saveFormDataToDatabase from '../config/saveFormDataToDatabase';
 
+// Import your custom marker icon image
+import customMarkerIcon from '../maps-flags_447031.png';
+
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw/dist/leaflet.draw.js';
@@ -27,7 +30,6 @@ const Map = () => {
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
 
-
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
     mapRef.current = map;
@@ -43,7 +45,13 @@ const Map = () => {
         polygon: true,
         polyline: true,
         circle: true,
-        marker: true,
+        marker: {
+          icon: new L.Icon({
+            iconUrl: customMarkerIcon, // Set your custom marker icon image path
+            iconSize: [32, 32], // Set the size of your custom marker icon
+            iconAnchor: [16, 32], // Set the anchor point of your custom marker icon
+          }),
+        },
       },
       edit: {
         featureGroup: drawnItems,
