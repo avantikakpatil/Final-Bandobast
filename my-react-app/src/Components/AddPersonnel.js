@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header'; // Import the Header component
 import Navbar from './Navbar'; // Import the Navbar component
 import PersonnelForm from './PersonnelForm'; // Import the PersonnelForm component
-import PersonnelList from './PersonnelList'; // Import the PersonnelList component
 import './AddPersonnel.css'; // Import your CSS file for styling if needed
 import { db } from '../config/firebaseConfig'; // Import your Firebase configuration
 import { ref, onValue } from 'firebase/database';
@@ -37,7 +36,26 @@ const AddPersonnel = () => {
       <div className="dashboard">
         <Navbar /> {/* Render the Navbar component */}
         <div className="content">
-          <PersonnelList personnelList={personnelList} /> {/* Render the personnel list component */}
+          <table className="personnel-table">
+            <thead>
+              <tr>
+                <th>Sr. No</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {personnelList.map((personnel, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{personnel.name}</td>
+                  <td>{personnel.position}</td>
+                  <td>{personnel.email}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <button className="add-button" onClick={toggleForm}>Add Officer</button> {/* Button to toggle the form */}
           {isFormOpen && (
             <div className="popup">
