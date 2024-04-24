@@ -18,95 +18,109 @@ const Map = () => {
   const mapRef = React.useRef();
   const [searchControl, setSearchControl] = useState(null);
   const [drawnLayers, setDrawnLayers] = useState([]);
+  const [personnelMarkers, setPersonnelMarkers] = useState([]);
  
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
     personnel: [],
     date: '',
     startTime: '',
-    endTime: ''
+    endTime: '',
+    coordinates: [] // Include coordinates state
   });
   const [loader, setLoader] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
-  const [personnelMarkers, setPersonnelMarkers] = useState([]);
 
   useEffect(() => {
-    const map = L.map('map').setView([20.5937, 78.9629], 5);
-    mapRef.current = map;
+  const map = L.map('map').setView([20.5937, 78.9629], 5);
+  mapRef.current = map;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
 
-    const drawControl = new L.Control.Draw({
-      draw: {
-        rectangle: true,
-        polygon: true,
-        polyline: true,
-        circle: true,
-        marker: {
-          icon: new L.Icon({
-            iconUrl: customMarkerIcon, // Set your custom marker icon image path
-            iconSize: [32, 32], // Set the size of your custom marker icon
-            iconAnchor: [16, 32], // Set the anchor point of your custom marker icon
-          }),
-        },
+  const drawControl = new L.Control.Draw({
+    draw: {
+      rectangle: true,
+      polygon: true,
+      polyline: true,
+      circle: true,
+      marker: {
+        icon: new L.Icon({
+          iconUrl: customMarkerIcon,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+        }),
       },
-      edit: {
-        featureGroup: drawnItems,
-        remove: true,
-      },
-    });
-    map.addControl(drawControl);
+    },
+    edit: {
+      featureGroup: drawnItems,
+      remove: true,
+    },
+  });
+  map.addControl(drawControl);
 
-    const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
-      defaultMarkGeocode: false,
-    }).addTo(map);
-    setSearchControl(searchControl);
+  const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
+    defaultMarkGeocode: false,
+  }).addTo(map);
+  setSearchControl(searchControl);
 
-    map.on('draw:created', function (event) {
-      const { layer, layerType } = event;
+  // Fetch and display existing sectors from the database
+  const bandobastRef = ref(db, 'bandobastDetails');
+  onValue(bandobastRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      Object.values(data).forEach((sector) => {
+        L.geoJSON(sector.geometry).addTo(map);
+      });
+    }
+  });
 
-      switch (layerType) {
-        case 'rectangle':
-        case 'polygon':
-        case 'polyline':
-        case 'circle':
-          drawnItems.addLayer(layer);
-          setDrawnLayers([...drawnLayers, layer]);
-          // Get the geometry of the drawn shape (assuming GeoJSON format)
-          const geometry = layer.toGeoJSON();
-          setBandobastDetails({ ...bandobastDetails, geometry });
-          setShowForm(true);
-          break;
-        case 'marker':
-        case 'circlemarker':
-          drawnItems.addLayer(layer);
-          setDrawnLayers([...drawnLayers, layer]);
-          break;
-        default:
-          break;
-      }
-    });
+  // Event listener for drawing new sectors
+  map.on('draw:created', function (event) {
+    const { layer, layerType } = event;
+    // Add the new sector to the map and save to database
+    switch (layerType) {
+      case 'rectangle':
+      case 'polygon':
+      case 'polyline':
+      case 'circle':
+        drawnItems.addLayer(layer);
+        setDrawnLayers([...drawnLayers, layer]);
+        const geometry = layer.toGeoJSON();
+        setBandobastDetails({ ...bandobastDetails, geometry });
+        setShowForm(true);
+        saveFormDataToDatabase({ ...bandobastDetails, geometry });
+        break;
+      case 'marker':
+      case 'circlemarker':
+        drawnItems.addLayer(layer);
+        setDrawnLayers([...drawnLayers, layer]);
+        break;
+      default:
+        break;
+    }
+  });
 
-    const personnelRef = ref(db, 'personnel');
-    onValue(personnelRef, (snapshot) => {
-      const personnelData = snapshot.val();
-      if (personnelData) {
-        const options = Object.keys(personnelData).map(key => ({
-          value: key,
-          label: personnelData[key].name // Assuming each personnel object has a 'name' property
-        }));
-        setPersonnelOptions(options);
-      }
-    });
+  const personnelRef = ref(db, 'personnel');
+  onValue(personnelRef, (snapshot) => {
+    const personnelData = snapshot.val();
+    if (personnelData) {
+      const options = Object.keys(personnelData).map((key) => ({
+        value: key,
+        label: personnelData[key].name,
+      }));
+      setPersonnelOptions(options);
+    }
+  });
 
-    return () => {
-      map.remove();
-    };
-  }, []);
+  return () => {
+    map.remove();
+  };
+}, []);
+
 
   const handleSearch = (query) => {
     if (searchControl) {
