@@ -1,53 +1,222 @@
-body{
-    margin-top:20px;
-    color: #1a202c;
-    text-align: left;
-    background-color: #e2e8f0;    
-}
-.main-body {
-    padding: 15px;
-}
-.card {
-    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06);
+/* App.css */
+
+body,
+html {
+  margin: 0;
+  padding: 0;
 }
 
-.card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    word-wrap: break-word;
-    background-color: #fff;
-    background-clip: border-box;
-    border: 0 solid rgba(0,0,0,.125);
-    border-radius: .25rem;
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.card-body {
-    flex: 1 1 auto;
-    min-height: 1px;
-    padding: 1rem;
+.dashboard {
+  display: flex;
+  flex: 1;
 }
 
-.gutters-sm {
-    margin-right: -8px;
-    margin-left: -8px;
+.content {
+  display: flex;
+  flex: 1; /* Fill remaining space */
 }
 
-.gutters-sm>.col, .gutters-sm>[class*=col-] {
-    padding-right: 8px;
-    padding-left: 8px;
-}
-.mb-3, .my-3 {
-    margin-bottom: 1rem!important;
+/* Add your custom styles for the navbar component here */
+
+/* Navbar styles */
+.navbar {
+  background-color: #ffffff;
+  padding: 10px;
+  width: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
-.bg-gray-300 {
-    background-color: #e2e8f0;
+
+
+
+.navbar-menu {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
-.h-100 {
-    height: 100%!important;
+
+.navbar-menu li {
+  margin-bottom: 15px;
 }
-.shadow-none {
-    box-shadow: none!important;
+
+.navbar-menu li a {
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.navbar-menu li a:hover {
+  transform: scale(1.1);
+}
+
+.navbar-icon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 5px;
+  transition: transform 0.3s;
+}
+
+.navbar-icon:hover {
+  transform: scale(1.2);
+}
+
+.navbar-icon:hover::after {
+  content: attr(alt);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+
+
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .navbar-menu li {
+    margin-bottom: 5px; /* Reduce spacing between menu items */
+  }
+
+  .navbar-icon {
+    width: 30px; /* Decrease width of logos */
+    height: 30px; /* Decrease height of logos */
+  }
+}
+
+
+
+
+
+/* Add your custom styles for the sidebar component here */
+
+.sidebar {
+  width: 250px; /* Adjust width as needed */
+  height: 100%; /* Occupy full height of its container */
+  background-color: #f0f0f0; /* Example background color */
+  /* Add any other necessary styles */
+}
+
+.sidebar-header {
+  padding: 10px;
+  background-color: #ccc; /* Example background color */
+}
+
+.sector-list {
+  overflow-y: auto; /* Enable vertical scroll if needed */
+  max-height: calc(100% - 100px); /* Adjust max height to leave space for header and footer */
+}
+
+.sector {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd; /* Example border style */
+}
+
+.selected-sector-info {
+  padding: 10px;
+  background-color: #eaeaea; /* Example background color */
+}
+
+/* Add any other necessary styles */
+
+
+.main-content {
+  padding: 5px;
+  flex-grow: 1;
+}
+
+
+/* Header styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #26349c;
+  margin-right: auto;
+  display: flex; /* Align items horizontally */
+  align-items: center; /* Center items vertically */
+}
+
+/* Adjust the logo size */
+.system-logo {
+  width: 40px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.header-profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.profile-name {
+  font-weight: bold;
+}
+.system-logo {
+  width: 40px; /* Adjust the width as needed */
+  height: auto; /* Maintain aspect ratio */
+  margin-right: 10px; /* Add any additional styling */
+}
+
+
+.header-profile {
+  display: flex;
+  align-items: center; /* Align items vertically */
+}
+
+.profile-icon {
+  width: 30px; /* Adjust width as needed */
+  height: 30px; /* Adjust height as needed */
+  margin-right: 10px; /* Spacing between icon and name */
+}
+
+.profile-name {
+  font-weight: bold; /* Bold font for the user's name */
+  /* Additional styles for the user's name */
+}
+/* App.css */
+
+.notification-icon {
+  width: 30px; /* Adjust width as needed */
+  height: 30px; /* Adjust height as needed */
+  margin-right: 10px; /* Spacing between notification icon and profile icon */
+}
+
+/* Map.css or App.css */
+
+.main-content{
+  border: 2px solid #ccc; /* Example border style */
+  border-radius: 5px; /* Optional: Add border radius for rounded corners */
+  padding: 10px; /* Optional: Add padding for spacing */
 }

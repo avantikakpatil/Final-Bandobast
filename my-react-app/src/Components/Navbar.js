@@ -13,13 +13,13 @@ class Navbar extends React.Component {
       <div className="navbar">
         <ul className="navbar-menu">
           <li>
-            <Link to="/dashboard">
+            <Link to="/homepage">
             <img src={logo} alt="Home" title="Home" className="navbar-icon" />
             </Link>
           </li>
 
           <li>
-            <Link to="/">
+            <Link to="/dashboard">
             <img src={logo1} alt="Sector" title="Sector" className="navbar-icon" />
             </Link>
           </li>

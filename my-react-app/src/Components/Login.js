@@ -14,7 +14,7 @@ export const Login = () => {
     const unsubscribe = onAuthStateChanged(database, (user) => {
       if (user) {
         // If user is signed in, redirect to Dashboard
-        history.push("/Dashboard");
+        history.push("/Homepage");
       }
     });
 
