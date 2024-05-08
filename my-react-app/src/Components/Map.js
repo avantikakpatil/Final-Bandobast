@@ -90,6 +90,8 @@ const Map = () => {
           break;
       }
     });
+
+    
     
     const bandobastRef = ref(db, 'bandobastDetails');
     onValue(bandobastRef, (snapshot) => {
