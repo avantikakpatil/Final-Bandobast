@@ -1,10 +1,10 @@
 import React from 'react';
-import './ProfilePage.css';
+
 
 const UserProfile = () => {
   return (
     <div className="container">
-      <h1>FirstName MiddleName LastName</h1>
+      <h1>Profile Info</h1>
 
       <div className="row">
         <div className="col-md-4 mb-3">
