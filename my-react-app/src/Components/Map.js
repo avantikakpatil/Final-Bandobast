@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, push } from 'firebase/database';
 import saveFormDataToDatabase from '../config/saveFormDataToDatabase';
 
 import customPersonnelIcon from '../maps-flags_447031.png';
@@ -80,6 +80,11 @@ const Map = () => {
           const geometry = layer.toGeoJSON();
           setBandobastDetails({ ...bandobastDetails, geometry });
           setShowForm(true);
+
+          // Push coordinates to the database
+          const coordinatesRef = ref(db, 'bandobastDetails');
+          push(coordinatesRef, geometry.coordinates);
+
           break;
         case 'marker':
         case 'circlemarker':
@@ -243,13 +248,11 @@ const Map = () => {
             </div>
             <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
             <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
-  <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={() => setShowForm(false)}>×</button>
-</div>
-
+              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={() => setShowForm(false)}>×</button>
+            </div>
           </form>
         </div>
       )}
-     
     </div>
   );
 };
