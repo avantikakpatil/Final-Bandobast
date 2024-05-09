@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
 import { ref, onValue, push } from 'firebase/database';
-import saveFormDataToDatabase from '../config/saveFormDataToDatabase';
 
-import customPersonnelIcon from '../maps-flags_447031.png';
+// Import or define customMarkerIcon
 import customMarkerIcon from '../maps-flags_447031.png';
 
 import 'leaflet/dist/leaflet.css';
@@ -18,15 +17,13 @@ const Map = () => {
   const mapRef = React.useRef();
   const [searchControl, setSearchControl] = useState(null);
   const [drawnLayers, setDrawnLayers] = useState([]);
-  const [personnelMarkers, setPersonnelMarkers] = useState([]);
- 
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
     personnel: [],
     date: '',
     startTime: '',
     endTime: '',
-    coordinates: [] // Include coordinates state
+    coordinates: []
   });
   const [loader, setLoader] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -78,12 +75,8 @@ const Map = () => {
           drawnItems.addLayer(layer);
           setDrawnLayers([...drawnLayers, layer]);
           const geometry = layer.toGeoJSON();
-          setBandobastDetails({ ...bandobastDetails, geometry });
+          setBandobastDetails({ ...bandobastDetails, coordinates: [...bandobastDetails.coordinates, geometry] });
           setShowForm(true);
-
-          // Push coordinates to the database
-          const coordinatesRef = ref(db, 'bandobastDetails');
-          push(coordinatesRef, geometry.coordinates);
 
           break;
         case 'marker':
@@ -93,22 +86,6 @@ const Map = () => {
           break;
         default:
           break;
-      }
-    });
-    
-    const bandobastRef = ref(db, 'bandobastDetails');
-    onValue(bandobastRef, (snapshot) => {
-      const bandobastData = snapshot.val();
-      if (bandobastData) {
-        // Extract and display sectors from database
-        Object.values(bandobastData).forEach(sector => {
-          const { coordinates } = sector;
-          if (coordinates && coordinates.length > 0) {
-            coordinates.forEach(coord => {
-              L.geoJSON(coord).addTo(map);
-            });
-          }
-        });
       }
     });
 
@@ -129,61 +106,36 @@ const Map = () => {
     };
   }, []);
 
-  const handleSearch = (query) => {
-    if (searchControl) {
-      searchControl.geosearch(query);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoader(true);
-  
+
     try {
-      // Fetch location of selected personnel
-      const personnelLocations = await Promise.all(
+      // Fetch personnel names from Firebase
+      const personnelNames = await Promise.all(
         bandobastDetails.personnel.map(async (personnelId) => {
           const personnelRef = ref(db, `personnel/${personnelId}`);
           let personnelData;
           await onValue(personnelRef, (snapshot) => {
             personnelData = snapshot.val();
           });
-          return {
-            id: personnelId,
-            location: {
-              latitude: personnelData.latitude,
-              longitude: personnelData.longitude
-            }
-          };
+          return personnelData.name; // Return only the name
         })
       );
-  
+
       // Get coordinates from drawn layers
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
-  
-      // Update bandobastDetails with personnel locations and coordinates
+
+      // Update bandobastDetails with personnel names and coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
-        personnel: personnelLocations,
+        personnelNames: personnelNames, // Add personnel names
         coordinates: coordinates
       };
-  
-      // Save updated data to the database
-      await saveFormDataToDatabase(updatedBandobastDetails);
 
-      const personnelIcon = L.icon({
-        iconUrl: customPersonnelIcon,
-        iconSize: [22, 22],
-        iconAnchor: [16, 32],
-      });
-  
-      // Display personnel markers on the map
-      const newPersonnelMarkers = personnelLocations.map(({ id, location }) => {
-        const marker = L.marker([location.latitude, location.longitude], { icon: personnelIcon }).addTo(mapRef.current).bindPopup(`Personnel ${id}`);
-        return marker;
-      });
-      setPersonnelMarkers(newPersonnelMarkers);
-  
+      // Save updated data to the database
+      await push(ref(db, 'bandobastDetails'), updatedBandobastDetails);
+
       // Reset the form data and loader state
       setShowForm(false);
       setLoader(false);
@@ -193,7 +145,8 @@ const Map = () => {
         personnel: [],
         date: '',
         startTime: '',
-        endTime: ''
+        endTime: '',
+        coordinates: []
       });
     } catch (error) {
       console.error('Error saving data: ', error);
