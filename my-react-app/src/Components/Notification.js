@@ -1,4 +1,5 @@
 import React from 'react';
+
 const Notification = () => {
   // Dummy data for notifications
   const notifications = [
@@ -10,12 +11,13 @@ const Notification = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-      <h3>Notifications</h3>
-        </div>
+        <h3>Notifications</h3>
+      </div>
       <ul>
         {notifications.map(notification => (
-          <li key={notification.id}>
-            <strong>{notification.title}</strong>: {notification.message}
+          <li key={notification.id} className="notification-item">
+            <div className="notification-title">{notification.title}</div>
+            <div className="notification-message">{notification.message}</div>
           </li>
         ))}
       </ul>

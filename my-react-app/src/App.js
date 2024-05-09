@@ -6,8 +6,8 @@ import HomepagePage from './Components/HomePage';
 import AddPersonnel from './Components/AddPersonnel';
 import { Login } from './Components/Login';
 
-import ProfilePage from './Components/ProfilePage'
-
+import ProfilePage from './Components/ProfilePage';
+import monitoring from './Components/Monitoring';
 import HomePage from './Components/HomePage';
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
           <Route path="/add-personnel" component={AddPersonnel} /> 
           <Route path="/homepage" component={HomePage} /> 
           <Route path="/dashboard" component={Dashboard} /> 
-
+          <Route path="/monitoring" component={monitoring} /> 
 
 
           <Route path="/home-page" component={HomePage} /> 

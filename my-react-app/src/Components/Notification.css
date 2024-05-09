@@ -1,0 +1,55 @@
+/* notification.css */
+
+.sidebar {
+    background-color: #f3f3f3;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .notification-item {
+    margin-bottom: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .notification-message {
+    color: #333;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 10px;
+  }
+  
+  .notification:nth-child(odd) .notification-item {
+    border: 1px solid #ccc;
+  }
+  
+  .notification:nth-child(even) .notification-item {
+    border: 1px solid #007bff;
+  }
+  
+  .notification:nth-child(3) .notification-item {
+    border: 1px solid #28a745;
+  }
+  
+  .notification:nth-child(4) .notification-item {
+    border: 1px solid #dc3545;
+  }
+  
+  .notification:nth-child(5) .notification-item {
+    border: 1px solid #ffc107;
+  }
+  
+  /* Add more styles for additional notifications if needed */
