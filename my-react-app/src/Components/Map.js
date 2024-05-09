@@ -4,7 +4,7 @@ import { db } from '../config/firebaseConfig';
 import { ref, onValue, push } from 'firebase/database';
 
 // Import or define customMarkerIcon
-import customMarkerIcon from '../maps-flags_447031.png';
+import customMarkerIcon from '../maps-flags_447031.png'; // Update path
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
