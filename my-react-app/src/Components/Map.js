@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue, push } from 'firebase/database';
-import saveFormDataToDatabase from '../config/saveFormDataToDatabase';
+import { ref, onValue, push, set } from 'firebase/database';
 
-import customPersonnelIcon from '../maps-flags_447031.png';
 import customMarkerIcon from '../maps-flags_447031.png';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw/dist/leaflet.draw.js';
-import 'leaflet-pip/leaflet-pip.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
 
 const Map = () => {
   const mapRef = React.useRef();
-  const [searchControl, setSearchControl] = useState(null);
   const [drawnLayers, setDrawnLayers] = useState([]);
-  const [personnelMarkers, setPersonnelMarkers] = useState([]);
- 
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
     personnel: [],
@@ -28,10 +22,19 @@ const Map = () => {
     endTime: '',
     coordinates: [] // Include coordinates state
   });
-  const [loader, setLoader] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
 
+  const addGeoJSONLayer = (geoJSON) => {
+    L.geoJSON(geoJSON, {
+      style: {
+        fillColor: 'red',
+        fillOpacity: 0.4,
+        color: 'blue',
+        weight: 2,
+      },
+    }).addTo(mapRef.current);
+  };
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
     mapRef.current = map;
@@ -62,11 +65,6 @@ const Map = () => {
     });
     map.addControl(drawControl);
 
-    const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
-      defaultMarkGeocode: false,
-    }).addTo(map);
-    setSearchControl(searchControl);
-
     map.on('draw:created', function (event) {
       const { layer, layerType } = event;
 
@@ -80,11 +78,6 @@ const Map = () => {
           const geometry = layer.toGeoJSON();
           setBandobastDetails({ ...bandobastDetails, geometry });
           setShowForm(true);
-
-          // Push coordinates to the database
-          const coordinatesRef = ref(db, 'bandobastDetails');
-          push(coordinatesRef, geometry.coordinates);
-
           break;
         case 'marker':
         case 'circlemarker':
@@ -96,8 +89,23 @@ const Map = () => {
       }
     });
 
-    
-    
+    const addGeoJSONLayer = (coordinates) => {
+      L.geoJSON({
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon', // Assuming the coordinates represent a polygon
+          coordinates: coordinates,
+        },
+      }, {
+        style: {
+          fillColor: 'blue',
+          fillOpacity: 0.4,
+          color: 'blue',
+          weight: 2,
+        },
+      }).addTo(map);
+    };
+
     const bandobastRef = ref(db, 'bandobastDetails');
     onValue(bandobastRef, (snapshot) => {
       const bandobastData = snapshot.val();
@@ -106,9 +114,7 @@ const Map = () => {
         Object.values(bandobastData).forEach(sector => {
           const { coordinates } = sector;
           if (coordinates && coordinates.length > 0) {
-            coordinates.forEach(coord => {
-              L.geoJSON(coord).addTo(map);
-            });
+            addGeoJSONLayer(coordinates);
           }
         });
       }
@@ -131,64 +137,24 @@ const Map = () => {
     };
   }, []);
 
-  const handleSearch = (query) => {
-    if (searchControl) {
-      searchControl.geosearch(query);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoader(true);
-  
     try {
-      // Fetch location of selected personnel
-      const personnelLocations = await Promise.all(
-        bandobastDetails.personnel.map(async (personnelId) => {
-          const personnelRef = ref(db, `personnel/${personnelId}`);
-          let personnelData;
-          await onValue(personnelRef, (snapshot) => {
-            personnelData = snapshot.val();
-          });
-          return {
-            id: personnelId,
-            location: {
-              latitude: personnelData.latitude,
-              longitude: personnelData.longitude
-            }
-          };
-        })
-      );
-  
       // Get coordinates from drawn layers
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
-  
-      // Update bandobastDetails with personnel locations and coordinates
+
+      // Update bandobastDetails with coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
-        personnel: personnelLocations,
         coordinates: coordinates
       };
-  
-      // Save updated data to the database
-      await saveFormDataToDatabase(updatedBandobastDetails);
 
-      const personnelIcon = L.icon({
-        iconUrl: customPersonnelIcon,
-        iconSize: [22, 22],
-        iconAnchor: [16, 32],
-      });
-  
-      // Display personnel markers on the map
-      const newPersonnelMarkers = personnelLocations.map(({ id, location }) => {
-        const marker = L.marker([location.latitude, location.longitude], { icon: personnelIcon }).addTo(mapRef.current).bindPopup(`Personnel ${id}`);
-        return marker;
-      });
-      setPersonnelMarkers(newPersonnelMarkers);
-  
-      // Reset the form data and loader state
+      // Save updated data to the database
+      const bandobastRef = ref(db, 'bandobastDetails');
+      const newBandobastRef = push(bandobastRef);
+      set(newBandobastRef, updatedBandobastDetails);
+
       setShowForm(false);
-      setLoader(false);
       alert('Data saved successfully!');
       setBandobastDetails({
         title: '',
@@ -200,7 +166,6 @@ const Map = () => {
     } catch (error) {
       console.error('Error saving data: ', error);
       alert('Error saving data: ' + error.message);
-      setLoader(false);
     }
   };
 
@@ -248,9 +213,9 @@ const Map = () => {
               <label>Duration To:</label>
               <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
+            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Create Bandobast</button>
             <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={() => setShowForm(false)}>×</button>
+              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={handleCloseForm}>×</button>
             </div>
           </form>
         </div>
