@@ -1,13 +1,17 @@
+// Sidebar.js
+
 import React from 'react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../config/firebaseConfig';
+import './Sidebar.css'; // Import CSS file
 
 class Sidebar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       sectors: [],
-      selectedSector: null
+      selectedSector: null,
+      activeSectors: [], // New state to track active sectors
     };
   }
 
@@ -17,24 +21,20 @@ class Sidebar extends React.Component {
     onValue(bandobastRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const sectorNames = Object.values(data).map(item => item.title); // Extract sector titles
+        const sectorNames = Object.values(data).map(item => ({
+          name: item.title,
+          active: false // Initialize all sectors as inactive
+        }));
         this.setState({ sectors: sectorNames });
       }
     });
   }
 
-  handleSectorClick = (sector) => {
-    // Fetch personnel names associated with the selected sector from Firebase
-    const bandobastRef = ref(db, 'bandobastDetails');
-    onValue(bandobastRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data && data[sector]) {
-        const personnelNames = data[sector].personnel || [];
-        this.setState({ selectedSector: sector, personnel: personnelNames });
-      }
-    });
+  handleSectorClick = (sectorIndex) => {
+    const sectors = [...this.state.sectors];
+    sectors[sectorIndex].active = !sectors[sectorIndex].active;
+    this.setState({ sectors });
   }
-  
 
   render() {
     return (
@@ -44,8 +44,12 @@ class Sidebar extends React.Component {
         </div>
         <div className="sector-list">
           {this.state.sectors.map((sector, index) => (
-            <div key={index} className="sector" onClick={() => this.handleSectorClick(sector)}>
-              {sector}
+            <div key={index} className={`sector ${sector.active ? 'active' : ''}`} onClick={() => this.handleSectorClick(index)}>
+              <span>{sector.name}</span>
+              <label className="switch rectangular">
+                <input type="checkbox" checked={sector.active} onChange={() => this.handleSectorClick(index)} />
+                <span className="slider rectangular"></span>
+              </label>
             </div>
           ))}
         </div>
