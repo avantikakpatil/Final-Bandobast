@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue, push } from 'firebase/database';
+import { ref, onValue, push, set } from 'firebase/database';
 
-// Import or define customMarkerIcon
-import customMarkerIcon from '../maps-flags_447031.png'; // Update path
+import customMarkerIcon from '../maps-flags_447031.png';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw/dist/leaflet.draw.js';
-import 'leaflet-pip/leaflet-pip.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
 
 const Map = () => {
   const mapRef = React.useRef();
-  const [searchControl, setSearchControl] = useState(null);
   const [drawnLayers, setDrawnLayers] = useState([]);
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
@@ -23,12 +20,21 @@ const Map = () => {
     date: '',
     startTime: '',
     endTime: '',
-    coordinates: []
+    coordinates: [] // Include coordinates state
   });
-  const [loader, setLoader] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
 
+  const addGeoJSONLayer = (geoJSON) => {
+    L.geoJSON(geoJSON, {
+      style: {
+        fillColor: 'red',
+        fillOpacity: 0.4,
+        color: 'blue',
+        weight: 2,
+      },
+    }).addTo(mapRef.current);
+  };
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
     mapRef.current = map;
@@ -59,11 +65,6 @@ const Map = () => {
     });
     map.addControl(drawControl);
 
-    const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
-      defaultMarkGeocode: false,
-    }).addTo(map);
-    setSearchControl(searchControl);
-
     map.on('draw:created', function (event) {
       const { layer, layerType } = event;
 
@@ -75,9 +76,8 @@ const Map = () => {
           drawnItems.addLayer(layer);
           setDrawnLayers([...drawnLayers, layer]);
           const geometry = layer.toGeoJSON();
-          setBandobastDetails({ ...bandobastDetails, coordinates: [...bandobastDetails.coordinates, geometry] });
+          setBandobastDetails({ ...bandobastDetails, geometry });
           setShowForm(true);
-
           break;
         case 'marker':
         case 'circlemarker':
@@ -88,6 +88,32 @@ const Map = () => {
           break;
       }
     });
+
+    const addGeoJSONLayer = (geoJSON) => {
+    L.geoJSON(geoJSON).addTo(map);
+    };
+
+    const bandobastRef = ref(db, 'bandobastDetails');
+  onValue(bandobastRef, (snapshot) => {
+    const bandobastData = snapshot.val();
+    if (bandobastData) {
+      // Extracting and display of sectors from database
+      Object.values(bandobastData).forEach(sector => {
+        const { coordinates } = sector;
+        if (coordinates && coordinates.length > 0) {
+          coordinates.forEach(coord => {
+            addGeoJSONLayer({
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon', 
+                coordinates: coord,
+              },
+            });
+          });
+        }
+      });
+    }
+  });
 
     const personnelRef = ref(db, 'personnel');
     onValue(personnelRef, (snapshot) => {
@@ -108,50 +134,33 @@ const Map = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoader(true);
-
     try {
-      // Fetch personnel names from Firebase
-      const personnelNames = await Promise.all(
-        bandobastDetails.personnel.map(async (personnelId) => {
-          const personnelRef = ref(db, `personnel/${personnelId}`);
-          let personnelData;
-          await onValue(personnelRef, (snapshot) => {
-            personnelData = snapshot.val();
-          });
-          return personnelData.name; // Return only the name
-        })
-      );
-
-      // Get coordinates from drawn layers
+      
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
 
-      // Update bandobastDetails with personnel names and coordinates
+      // Update bandobastDetails with coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
-        personnelNames: personnelNames, // Add personnel names
         coordinates: coordinates
       };
 
       // Save updated data to the database
-      await push(ref(db, 'bandobastDetails'), updatedBandobastDetails);
+      const bandobastRef = ref(db, 'bandobastDetails');
+      const newBandobastRef = push(bandobastRef);
+      set(newBandobastRef, updatedBandobastDetails);
 
-      // Reset the form data and loader state
       setShowForm(false);
-      setLoader(false);
       alert('Data saved successfully!');
       setBandobastDetails({
         title: '',
         personnel: [],
         date: '',
         startTime: '',
-        endTime: '',
-        coordinates: []
+        endTime: ''
       });
     } catch (error) {
       console.error('Error saving data: ', error);
       alert('Error saving data: ' + error.message);
-      setLoader(false);
     }
   };
 
@@ -199,9 +208,9 @@ const Map = () => {
               <label>Duration To:</label>
               <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
+            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Create Bandobast</button>
             <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={() => setShowForm(false)}>×</button>
+              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={handleCloseForm}>×</button>
             </div>
           </form>
         </div>
