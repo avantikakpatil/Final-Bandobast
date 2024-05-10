@@ -25,7 +25,7 @@ class Navbar extends React.Component {
           </li>
 
           <li>
-            <Link to="/">
+            <Link to="/monitoring">
             <img src={logo2} alt="Monitor" title="Monitor" className="navbar-icon" />
             </Link>
           </li>

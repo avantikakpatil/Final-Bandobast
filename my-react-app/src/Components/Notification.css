@@ -1,0 +1,68 @@
+/* Notification.css */
+
+/* Styles for Notification Panel */
+.sidebar {
+    background-color: #fff; /* Change background color to white */
+    border: 1px solid #ddd; /* Add border */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Light drop shadow */
+}
+
+.sidebar-header {
+    border-bottom: none; /* Remove border */
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333; /* Change text color to dark */
+}
+
+/* Styles for Notification Items */
+.notification-item {
+    margin-bottom: 10px;
+    border: 1px solid #ddd; /* Border color */
+    border-radius: 5px;
+    padding: 10px;
+    display: flex; /* Make notifications flex containers */
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Space evenly between items */
+}
+
+.notification-message {
+    color: #333; /* Change text color to dark */
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0; /* Remove default margin */
+    flex: 1; /* Take up remaining space */
+    /* Adjust max-width to increase length of notification message */
+    max-width: 300px; /* Adjust as needed */
+}
+
+/* Color-coding Notifications based on Message */
+.notification-item.alert {
+    background-color: rgba(220, 53, 69, 0.1); /* Light red background */
+}
+
+.notification-item.out-of-area {
+    background-color: rgba(255, 193, 7, 0.1); /* Light orange background */
+}
+
+.notification-item.bandobast-ended {
+    background-color: rgba(40, 167, 69, 0.1); /* Light green background */
+}
+
+/* Close Button for Notifications */
+.notification-close {
+    cursor: pointer; /* Show pointer cursor on hover */
+    margin-left: 10px; /* Add spacing between message and close button */
+    color: #888; /* Set color for close button */
+    font-size: 1.2rem; /* Set font size */
+}
+
+.notification-close:hover {
+    color: #555; /* Change color on hover */
+}

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { db } from '../config/firebaseConfig';
 import { ref, push } from 'firebase/database'; 
 
-
 const PersonnelForm = ({ onClose, addPersonnel }) => {
   const [formData, setFormData] = useState({
     name: '',
     position: '',
     email: '',
     latitude: '', 
-    longitude: '' 
+    longitude: '',
+    deviceId: '' // Added deviceId field
   });
 
   const handleChange = (e) => {
@@ -80,6 +80,16 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
           type="text" 
           name="longitude" 
           value={formData.longitude}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="form-group"> {/* Device ID Field */}
+        <label>Device ID:</label>
+        <input
+          type="text" 
+          name="deviceId" 
+          value={formData.deviceId}
           onChange={handleChange}
           required
         />

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Header from './Header'; // Import the Header component
-import Navbar from './Navbar'; // Import the Navbar component
-import PersonnelForm from './PersonnelForm'; // Import the PersonnelForm component
-import './AddPersonnel.css'; // Import your CSS file for styling if needed
-import { db } from '../config/firebaseConfig'; // Import your Firebase configuration
+import Header from './Header';
+import Navbar from './Navbar';
+import PersonnelForm from './PersonnelForm';
+import './AddPersonnel.css';
+import { db } from '../config/firebaseConfig';
 import { ref, onValue } from 'firebase/database';
 
 const AddPersonnel = () => {
@@ -11,15 +11,15 @@ const AddPersonnel = () => {
   const [personnelList, setPersonnelList] = useState([]);
 
   useEffect(() => {
-    const personnelRef = ref(db, 'personnel'); // Assuming 'personnel' is your Firebase database node
+    const personnelRef = ref(db, 'personnel');
     onValue(personnelRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const personnelData = Object.values(data); // Convert the object of personnel to an array
+        const personnelData = Object.values(data);
         setPersonnelList(personnelData);
       }
     });
-  }, []); // Empty dependency array ensures the effect runs only once, equivalent to componentDidMount
+  }, []);
 
   const toggleForm = () => {
     setIsFormOpen(!isFormOpen);
@@ -27,14 +27,14 @@ const AddPersonnel = () => {
 
   const addPersonnel = (newPersonnel) => {
     setPersonnelList([...personnelList, newPersonnel]);
-    setIsFormOpen(false); // Close the form after adding personnel
+    setIsFormOpen(false);
   };
 
   return (
     <div>
-      <Header /> {/* Render the Header component */}
+      <Header />
       <div className="dashboard">
-        <Navbar /> {/* Render the Navbar component */}
+        <Navbar />
         <div className="content">
           <table className="personnel-table">
             <thead>
@@ -43,6 +43,7 @@ const AddPersonnel = () => {
                 <th>Name</th>
                 <th>Position</th>
                 <th>Email</th>
+                <th>Device ID</th> {/* New column for Device ID */}
               </tr>
             </thead>
             <tbody>
@@ -52,16 +53,17 @@ const AddPersonnel = () => {
                   <td>{personnel.name}</td>
                   <td>{personnel.position}</td>
                   <td>{personnel.email}</td>
+                  <td>{personnel.deviceId}</td> {/* Display Device ID */}
                 </tr>
               ))}
             </tbody>
           </table>
-          <button className="add-button" onClick={toggleForm}>Add Officer</button> {/* Button to toggle the form */}
+          <button className="add-button" onClick={toggleForm}>Add Officer</button>
           {isFormOpen && (
             <div className="popup">
               <div className="popup-content">
-                <button className="close-button" onClick={() => setIsFormOpen(false)}>×</button> {/* Close button */}
-                <PersonnelForm onClose={() => setIsFormOpen(false)} addPersonnel={addPersonnel} /> {/* Render the form component */}
+                <button className="close-button" onClick={() => setIsFormOpen(false)}>×</button>
+                <PersonnelForm onClose={() => setIsFormOpen(false)} addPersonnel={addPersonnel} />
               </div>
             </div>
           )}
