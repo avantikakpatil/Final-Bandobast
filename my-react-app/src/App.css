@@ -35,9 +35,6 @@ html {
   position: relative;
 }
 
-
-
-
 .navbar-menu {
   list-style-type: none;
   margin: 0;
@@ -87,9 +84,6 @@ html {
   font-size: 14px;
 }
 
-
-
-
 /* Responsive styles */
 @media screen and (max-width: 768px) {
   .navbar-menu li {
@@ -101,10 +95,6 @@ html {
     height: 30px; /* Decrease height of logos */
   }
 }
-
-
-
-
 
 /* Add your custom styles for the sidebar component here */
 
@@ -121,8 +111,9 @@ html {
 }
 
 .sector-list {
-  overflow-y: auto; /* Enable vertical scroll if needed */
-  max-height: calc(100% - 100px); /* Adjust max height to leave space for header and footer */
+  max-height: calc(
+    100% - 100px
+  ); /* Adjust max height to leave space for header and footer */
 }
 
 .sector {
@@ -138,12 +129,10 @@ html {
 
 /* Add any other necessary styles */
 
-
 .main-content {
   padding: 5px;
   flex-grow: 1;
 }
-
 
 /* Header styles */
 .header {
@@ -188,8 +177,6 @@ html {
   height: auto; /* Maintain aspect ratio */
   margin-right: 10px; /* Add any additional styling */
 }
-
-
 .header-profile {
   display: flex;
   align-items: center; /* Align items vertically */
@@ -215,7 +202,7 @@ html {
 
 /* Map.css or App.css */
 
-.main-content{
+.main-content {
   border: 2px solid #ccc; /* Example border style */
   border-radius: 5px; /* Optional: Add border radius for rounded corners */
   padding: 10px; /* Optional: Add padding for spacing */

@@ -1,7 +1,7 @@
-import React from 'react';
-import { ref, onValue } from 'firebase/database';
-import { db } from '../config/firebaseConfig';
-import './Sidebar.css'; // Import CSS file
+import React from "react";
+import { ref, onValue } from "firebase/database";
+import { db } from "../config/firebaseConfig";
+import "./Sidebar.css"; // Import CSS file
 
 class Sidebar extends React.Component {
   constructor(props) {
@@ -16,14 +16,14 @@ class Sidebar extends React.Component {
 
   componentDidMount() {
     // Fetch sector names from Firebase
-    const bandobastRef = ref(db, 'bandobastDetails');
+    const bandobastRef = ref(db, "bandobastDetails");
     onValue(bandobastRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const sectorNames = Object.values(data).map(item => ({
+        const sectorNames = Object.values(data).map((item) => ({
           name: item.title,
           personnel: item.personnel, // Include personnel information
-          active: false // Initialize all sectors as inactive
+          active: false, // Initialize all sectors as inactive
         }));
         this.setState({ sectors: sectorNames });
       }
@@ -48,7 +48,7 @@ class Sidebar extends React.Component {
     // Toggle active state
     sectors[sectorIndex].active = !sectors[sectorIndex].active;
     this.setState({ sectors });
-  }
+  };
 
   render() {
     return (
@@ -58,11 +58,22 @@ class Sidebar extends React.Component {
         </div>
         <div className="sector-list">
           {this.state.sectors.map((sector, index) => (
-            <div key={index} className={`sector ${sector.active ? 'active' : ''}`} onClick={() => this.handleSectorClick(index)}>
+            <div
+              key={index}
+              className={`sector ${sector.active ? "active" : ""}`}
+              onClick={() => this.handleSectorClick(index)}
+            >
               <span>{sector.name}</span>
               <label className="switch rectangular">
-                <input type="checkbox" checked={sector.active} onChange={() => {}} />
-                <span className="slider rectangular" onClick={(event) => event.stopPropagation()}></span>
+                <input
+                  type="checkbox"
+                  checked={sector.active}
+                  onChange={() => {}}
+                />
+                <span
+                  className="slider rectangular"
+                  onClick={(event) => event.stopPropagation()}
+                ></span>
               </label>
             </div>
           ))}
@@ -77,9 +88,13 @@ class Sidebar extends React.Component {
                   <p>Title: {this.state.additionalInfo.title}</p>
                   <p>Personnel:</p>
                   <ul>
-                    {Object.values(this.state.additionalInfo.personnel).map((person, index) => (
-                      <li key={index}>{person.name} - {person.position}</li>
-                    ))}
+                    {Object.values(this.state.additionalInfo.personnel).map(
+                      (person, index) => (
+                        <li key={index}>
+                          {person.name} - {person.position}
+                        </li>
+                      )
+                    )}
                   </ul>
                 </div>
               )}
