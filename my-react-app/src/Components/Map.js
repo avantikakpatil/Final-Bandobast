@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from "react";
-import L from "leaflet";
-import { db } from "../config/firebaseConfig";
-import { ref, onValue, push } from "firebase/database";
-
-// Import or define customMarkerIcon
-import customMarkerIcon from "../maps-flags_447031.png"; // Update path
-
-import "leaflet/dist/leaflet.css";
-import "leaflet-draw/dist/leaflet.draw.css";
-import "leaflet-draw/dist/leaflet.draw.js";
-import "leaflet-pip/leaflet-pip.js";
-import "leaflet-control-geocoder/dist/Control.Geocoder.css";
-import "leaflet-control-geocoder/dist/Control.Geocoder.js";
-=======
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
@@ -26,7 +10,6 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw/dist/leaflet.draw.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
 
 const Map = () => {
   const mapRef = React.useRef();
@@ -34,17 +17,10 @@ const Map = () => {
   const [bandobastDetails, setBandobastDetails] = useState({
     title: "",
     personnel: [],
-<<<<<<< HEAD
-    date: "",
-    startTime: "",
-    endTime: "",
-    coordinates: [],
-=======
     date: '',
     startTime: '',
     endTime: '',
     coordinates: [] // Include coordinates state
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
@@ -161,39 +137,12 @@ const Map = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-<<<<<<< HEAD
-      // Fetch personnel names from Firebase
-      const personnelNames = await Promise.all(
-        bandobastDetails.personnel.map(async (personnelId) => {
-          const personnelRef = ref(db, `personnel/${personnelId}`);
-          let personnelData;
-          await onValue(personnelRef, (snapshot) => {
-            personnelData = snapshot.val();
-          });
-          return personnelData.name; // Return only the name
-        })
-      );
-
-      // Get coordinates from drawn layers
-      const coordinates = drawnLayers.map(
-        (layer) => layer.toGeoJSON().geometry.coordinates
-      );
-=======
       
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
 
       // Update bandobastDetails with coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
-<<<<<<< HEAD
-        personnelNames: personnelNames, // Add personnel names
-        coordinates: coordinates,
-      };
-
-      // Save updated data to the database
-      await push(ref(db, "bandobastDetails"), updatedBandobastDetails);
-=======
         coordinates: coordinates
       };
 
@@ -201,29 +150,12 @@ const Map = () => {
       const bandobastRef = ref(db, 'bandobastDetails');
       const newBandobastRef = push(bandobastRef);
       set(newBandobastRef, updatedBandobastDetails);
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
 
       setShowForm(false);
-<<<<<<< HEAD
-      setLoader(false);
-      alert("Data saved successfully!");
-=======
       alert('Data saved successfully!');
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
       setBandobastDetails({
         title: "",
         personnel: [],
-<<<<<<< HEAD
-        date: "",
-        startTime: "",
-        endTime: "",
-        coordinates: [],
-      });
-    } catch (error) {
-      console.error("Error saving data: ", error);
-      alert("Error saving data: " + error.message);
-      setLoader(false);
-=======
         date: '',
         startTime: '',
         endTime: ''
@@ -231,7 +163,6 @@ const Map = () => {
     } catch (error) {
       console.error('Error saving data: ', error);
       alert('Error saving data: ' + error.message);
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
     }
   };
 
@@ -401,47 +332,9 @@ const Map = () => {
                 }}
               />
             </div>
-<<<<<<< HEAD
-            <button
-              type="submit"
-              style={{
-                width: "100%",
-                padding: "10px",
-                backgroundColor: "#007bff",
-                color: "#fff",
-                borderRadius: "5px",
-                border: "none",
-                cursor: "pointer",
-              }}
-              disabled={loader}
-            >
-              Create Bandobast
-            </button>
-            <div
-              style={{
-                position: "absolute",
-                top: "5px",
-                right: "5px",
-                zIndex: 1001,
-              }}
-            >
-              <button
-                style={{
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  fontSize: "1.5em",
-                  color: "black",
-                }}
-                onClick={() => setShowForm(false)}
-              >
-                ×
-              </button>
-=======
             <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Create Bandobast</button>
             <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
               <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={handleCloseForm}>×</button>
->>>>>>> 8cf66b7cdc78138cb6e639de0a7fe2d05e3e3802
             </div>
           </form>
         </div>
