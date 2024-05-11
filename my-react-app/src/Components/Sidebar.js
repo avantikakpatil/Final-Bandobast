@@ -11,6 +11,7 @@ class Sidebar extends React.Component {
       selectedSector: null,
       activeSectors: [], // New state to track active sectors
       additionalInfo: null, // State to hold additional information about the selected sector
+      showAdditionalInfo: false // State to control the visibility of additional information
     };
   }
 
@@ -50,11 +51,17 @@ class Sidebar extends React.Component {
     this.setState({ sectors });
   };
 
+  toggleAdditionalInfo = () => {
+    this.setState((prevState) => ({
+      showAdditionalInfo: !prevState.showAdditionalInfo
+    }));
+  };
+
   render() {
     return (
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>Sidebar</h2>
+          <h2>Sectors</h2>
         </div>
         <div className="sector-list">
           {this.state.sectors.map((sector, index) => (
@@ -70,23 +77,19 @@ class Sidebar extends React.Component {
                   checked={sector.active}
                   onChange={() => {}}
                 />
+                
                 <span
                   className="slider rectangular"
                   onClick={(event) => event.stopPropagation()}
                 ></span>
               </label>
-            </div>
-          ))}
-        </div>
-        <div className="navbar-footer">
-          {this.state.selectedSector && (
-            <div className="selected-sector-info">
-              <h3>{this.state.selectedSector.name}</h3>
-              {this.state.additionalInfo && (
-                <div>
-                  <h4>Additional Information:</h4>
-                  <p>Title: {this.state.additionalInfo.title}</p>
-                  <p>Personnel:</p>
+            
+              <button onClick={this.toggleAdditionalInfo}>
+                {this.state.showAdditionalInfo ? "Hide" : "Additional \t Info"} 
+              </button>
+              {this.state.showAdditionalInfo && this.state.additionalInfo && (
+                <div className="additional-info">
+                  <h4>Personnel:</h4>                  
                   <ul>
                     {Object.values(this.state.additionalInfo.personnel).map(
                       (person, index) => (
@@ -98,9 +101,9 @@ class Sidebar extends React.Component {
                   </ul>
                 </div>
               )}
-            </div>
-          )}
-        </div>
+            </div>           
+          ))}
+        </div>      
       </div>
     );
   }
