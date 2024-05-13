@@ -67,25 +67,38 @@ class Sidebar extends React.Component {
 
   handleSliderClick = (event, index) => {
     event.stopPropagation();
-    // Increment the count of slider clicks for the specific sector
-    this.setState((prevState) => {
-      const sliderClickedCounts = [...prevState.sliderClicked];
-      sliderClickedCounts[index] = (sliderClickedCounts[index] || 0) + 1;
-      return { sliderClicked: sliderClickedCounts };
-    });
 
     // Show different alerts based on the count of slider clicks for the specific sector
     const sliderClickedCount = this.state.sliderClicked[index] || 0;
     if (sliderClickedCount % 2 === 0) {
-      alert("Do you really want to activate this sector?");
-    } else {
-      alert("Do you really want to deactivate this sector?");
-    }
+      if (window.confirm("Do you really want to activate this sector?")) {
+        // Increment the count of slider clicks for the specific sector
+        this.setState((prevState) => {
+          const sliderClickedCounts = [...prevState.sliderClicked];
+          sliderClickedCounts[index] = (sliderClickedCounts[index] || 0) + 1;
+          return { sliderClicked: sliderClickedCounts };
+        });
 
-    // Toggle the active state of the sector
-    const sectors = [...this.state.sectors];
-    sectors[index].active = !sectors[index].active;
-    this.setState({ sectors });
+        // Toggle the active state of the sector
+        const sectors = [...this.state.sectors];
+        sectors[index].active = !sectors[index].active;
+        this.setState({ sectors });
+      }
+    } else {
+      if (window.confirm("Do you really want to deactivate this sector?")) {
+        // Increment the count of slider clicks for the specific sector
+        this.setState((prevState) => {
+          const sliderClickedCounts = [...prevState.sliderClicked];
+          sliderClickedCounts[index] = (sliderClickedCounts[index] || 0) + 1;
+          return { sliderClicked: sliderClickedCounts };
+        });
+
+        // Toggle the active state of the sector
+        const sectors = [...this.state.sectors];
+        sectors[index].active = !sectors[index].active;
+        this.setState({ sectors });
+      }
+    }
   };
 
   render() {
