@@ -51,11 +51,13 @@ class Sidebar extends React.Component {
     this.setState({ sectors });
   };
 
-  toggleAdditionalInfo = () => {
+  toggleAdditionalInfo = (event) => {
+    event.stopPropagation(); // Stop event propagation to prevent toggling the active state
     this.setState((prevState) => ({
       showAdditionalInfo: !prevState.showAdditionalInfo
     }));
   };
+  
 
   handleSliderClick = (event) => {
     event.stopPropagation();
@@ -87,9 +89,10 @@ class Sidebar extends React.Component {
                   onClick={this.handleSliderClick}
                 ></span>
               </label>
-              <button onClick={this.toggleAdditionalInfo}>
-                {this.state.showAdditionalInfo ? "Hide" : "Info"} 
-              </button>
+              <button onClick={(event) => this.toggleAdditionalInfo(event)}>
+  {this.state.showAdditionalInfo ? "Hide" : "Info"} 
+</button>
+
               {this.state.showAdditionalInfo && this.state.additionalInfo && (
                 <div className="additional-info">
                   <h4>Personnel:</h4>
