@@ -9,9 +9,8 @@ class Sidebar extends React.Component {
     this.state = {
       sectors: [],
       selectedSector: null,
-      activeSectors: [], // New state to track active sectors
       additionalInfo: {}, // State to hold additional information about the selected sector
-      sliderClicked: false, // State to track whether the slider has been clicked
+      sliderClicked: [], // State to track the number of times the slider has been clicked for each sector
     };
   }
 
@@ -26,38 +25,31 @@ class Sidebar extends React.Component {
           personnel: item.personnel, // Include personnel information
           active: false, // Initialize all sectors as inactive
         }));
-        this.setState({ sectors: sectorNames });
+        this.setState({ sectors: sectorNames, sliderClicked: Array(sectorNames.length).fill(0) });
       }
     });
   }
 
-  handleSectorClick = (sectorIndex, isSliderClicked) => {
-    // Check if the click event originated from the slider rectangular
-    if (isSliderClicked) {
-      const sectors = [...this.state.sectors];
-      sectors[sectorIndex].active = !sectors[sectorIndex].active;
-      this.setState({ sectors });
-    } else {
-      // Fetch additional information for the selected sector
-      const selectedSector = this.state.sectors[sectorIndex];
-      this.setState({ selectedSector });
+  handleSectorClick = (sectorIndex) => {
+    // Fetch additional information for the selected sector
+    const selectedSector = this.state.sectors[sectorIndex];
+    this.setState({ selectedSector });
 
-      const additionalInfoRef = ref(db, selectedSector.title);
-      onValue(additionalInfoRef, (snapshot) => {
-        const additionalInfo = snapshot.val();
-        if (additionalInfo) {
-          this.setState((prevState) => ({
-            additionalInfo: {
-              ...prevState.additionalInfo,
-              [sectorIndex]: {
-                show: prevState.additionalInfo[sectorIndex]?.show || false,
-                data: additionalInfo,
-              },
+    const additionalInfoRef = ref(db, selectedSector.title);
+    onValue(additionalInfoRef, (snapshot) => {
+      const additionalInfo = snapshot.val();
+      if (additionalInfo) {
+        this.setState((prevState) => ({
+          additionalInfo: {
+            ...prevState.additionalInfo,
+            [sectorIndex]: {
+              show: prevState.additionalInfo[sectorIndex]?.show || false,
+              data: additionalInfo,
             },
-          }));
-        }
-      });
-    }
+          },
+        }));
+      }
+    });
   };
 
   toggleAdditionalInfo = (event, index) => {
@@ -75,11 +67,25 @@ class Sidebar extends React.Component {
 
   handleSliderClick = (event, index) => {
     event.stopPropagation();
-    alert("Do you really want to activate this sector?");
-    // Set sliderClicked to true when slider is clicked
-    this.setState({ sliderClicked: true });
-    // Call handleSectorClick with isSliderClicked true
-    this.handleSectorClick(index, true);
+    // Increment the count of slider clicks for the specific sector
+    this.setState((prevState) => {
+      const sliderClickedCounts = [...prevState.sliderClicked];
+      sliderClickedCounts[index] = (sliderClickedCounts[index] || 0) + 1;
+      return { sliderClicked: sliderClickedCounts };
+    });
+
+    // Show different alerts based on the count of slider clicks for the specific sector
+    const sliderClickedCount = this.state.sliderClicked[index] || 0;
+    if (sliderClickedCount % 2 === 0) {
+      alert("Do you really want to activate this sector?");
+    } else {
+      alert("Do you really want to deactivate this sector?");
+    }
+
+    // Toggle the active state of the sector
+    const sectors = [...this.state.sectors];
+    sectors[index].active = !sectors[index].active;
+    this.setState({ sectors });
   };
 
   render() {
@@ -93,7 +99,7 @@ class Sidebar extends React.Component {
             <div
               key={index}
               className={`sector ${sector.active ? "active" : ""}`}
-              onClick={() => this.handleSectorClick(index, false)}
+              onClick={() => this.handleSectorClick(index)}
             >
               <span>{sector.name}</span>
               <label className="switch rectangular">
