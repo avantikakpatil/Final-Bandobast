@@ -57,6 +57,11 @@ class Sidebar extends React.Component {
     }));
   };
 
+  handleSliderClick = (event) => {
+    event.stopPropagation();
+    alert("Do you really want to activate this sector?");
+  };
+
   render() {
     return (
       <div className="sidebar">
@@ -77,19 +82,17 @@ class Sidebar extends React.Component {
                   checked={sector.active}
                   onChange={() => {}}
                 />
-                
                 <span
                   className="slider rectangular"
-                  onClick={(event) => event.stopPropagation()}
+                  onClick={this.handleSliderClick}
                 ></span>
               </label>
-            
               <button onClick={this.toggleAdditionalInfo}>
-                {this.state.showAdditionalInfo ? "Hide" : "Additional \t Info"} 
+                {this.state.showAdditionalInfo ? "Hide" : "Info"} 
               </button>
               {this.state.showAdditionalInfo && this.state.additionalInfo && (
                 <div className="additional-info">
-                  <h4>Personnel:</h4>                  
+                  <h4>Personnel:</h4>
                   <ul>
                     {Object.values(this.state.additionalInfo.personnel).map(
                       (person, index) => (
@@ -101,9 +104,9 @@ class Sidebar extends React.Component {
                   </ul>
                 </div>
               )}
-            </div>           
+            </div>
           ))}
-        </div>      
+        </div>
       </div>
     );
   }
