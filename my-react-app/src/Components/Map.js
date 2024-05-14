@@ -19,8 +19,8 @@ const Map = () => {
     personnel: [],
     date: '',
     startTime: '',
-    endTime: '',
-    coordinates: [] // Include coordinates state
+    endTime: ''
+    //coordinates: [] // Include coordinates state
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
@@ -28,7 +28,7 @@ const Map = () => {
   const addGeoJSONLayer = (geoJSON) => {
     L.geoJSON(geoJSON, {
       style: {
-        fillColor: 'red',
+        fillColor: 'blue',
         fillOpacity: 0.4,
         color: 'blue',
         weight: 2,
@@ -99,7 +99,7 @@ const Map = () => {
     if (bandobastData) {
       // Extracting and display of sectors from database
       Object.values(bandobastData).forEach(sector => {
-        const { coordinates } = sector;
+        const { coordinates, title } = sector;
         if (coordinates && coordinates.length > 0) {
           coordinates.forEach(coord => {
             addGeoJSONLayer({
@@ -131,6 +131,7 @@ const Map = () => {
       map.remove();
     };
   }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,7 +157,7 @@ const Map = () => {
         personnel: [],
         date: '',
         startTime: '',
-        endTime: ''
+        endTime: '',
       });
     } catch (error) {
       console.error('Error saving data: ', error);
