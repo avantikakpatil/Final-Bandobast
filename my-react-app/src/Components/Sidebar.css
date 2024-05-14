@@ -10,6 +10,7 @@
   margin: 0;
   font-size: 24px;
 }
+
 /* Rectangular toggle switch */
 .switch {
   position: relative;
@@ -72,6 +73,20 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
 .navbar-footer {
   padding: 10px;
+}
+
+/* Additional info button and delete button container */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.info-button, .delete-button {
+  width: 48%; /* Slightly less than half to add some space between the buttons */
+  padding: 5px;
+  text-align: center;
 }

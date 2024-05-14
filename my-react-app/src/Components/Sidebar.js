@@ -1,5 +1,5 @@
 import React from "react";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, remove } from "firebase/database";
 import { db } from "../config/firebaseConfig";
 import "./Sidebar.css"; // Import CSS file
 
@@ -101,6 +101,28 @@ class Sidebar extends React.Component {
     }
   };
 
+  handleDeleteSector = (event, index) => {
+    event.stopPropagation();
+    const sectorToDelete = this.state.sectors[index];
+    if (window.confirm(`Do you really want to delete the sector "${sectorToDelete.name}"?`)) {
+      const sectorRef = ref(db, `bandobastDetails/${sectorToDelete.name}`);
+      remove(sectorRef).then(() => {
+        // Remove the sector from the local state
+        this.setState((prevState) => {
+          const sectors = [...prevState.sectors];
+          sectors.splice(index, 1);
+          const sliderClicked = [...prevState.sliderClicked];
+          sliderClicked.splice(index, 1);
+          const additionalInfo = { ...prevState.additionalInfo };
+          delete additionalInfo[index];
+          return { sectors, sliderClicked, additionalInfo };
+        });
+      }).catch((error) => {
+        console.error("Error deleting sector:", error);
+      });
+    }
+  };
+
   render() {
     return (
       <div className="sidebar">
@@ -126,9 +148,20 @@ class Sidebar extends React.Component {
                   onClick={(event) => this.handleSliderClick(event, index)}
                 ></span>
               </label>
-              <button onClick={(event) => this.toggleAdditionalInfo(event, index)}>
-                {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
-              </button>
+              <div className="button-container">
+                <button
+                  className="info-button"
+                  onClick={(event) => this.toggleAdditionalInfo(event, index)}
+                >
+                  {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={(event) => this.handleDeleteSector(event, index)}
+                >
+                  Delete
+                </button>
+              </div>
               {this.state.additionalInfo[index]?.show &&
                 this.state.additionalInfo[index]?.data && (
                   <div className="additional-info">
