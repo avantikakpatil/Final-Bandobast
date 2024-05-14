@@ -19,8 +19,8 @@ const Map = () => {
     personnel: [],
     date: '',
     startTime: '',
-    endTime: '',
-    coordinates: [] // Include coordinates state
+    endTime: ''
+    //coordinates: [] // Include coordinates state
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
@@ -28,7 +28,7 @@ const Map = () => {
   const addGeoJSONLayer = (geoJSON) => {
     L.geoJSON(geoJSON, {
       style: {
-        fillColor: 'red',
+        fillColor: 'blue',
         fillOpacity: 0.4,
         color: 'blue',
         weight: 2,
@@ -67,7 +67,7 @@ const Map = () => {
 
     map.on('draw:created', function (event) {
       const { layer, layerType } = event;
-
+    
       switch (layerType) {
         case 'rectangle':
         case 'polygon':
@@ -78,42 +78,47 @@ const Map = () => {
           const geometry = layer.toGeoJSON();
           setBandobastDetails({ ...bandobastDetails, geometry });
           setShowForm(true);
+
           break;
         case 'marker':
         case 'circlemarker':
-          drawnItems.addLayer(layer);
-          setDrawnLayers([...drawnLayers, layer]);
+          
           break;
         default:
           break;
       }
     });
+  
+    function addPopupToSector(layer, sectorName) {
+      layer.bindPopup(sectorName);
+    }
 
     const addGeoJSONLayer = (geoJSON) => {
     L.geoJSON(geoJSON).addTo(map);
     };
 
     const bandobastRef = ref(db, 'bandobastDetails');
-  onValue(bandobastRef, (snapshot) => {
-    const bandobastData = snapshot.val();
-    if (bandobastData) {
-      // Extracting and display of sectors from database
-      Object.values(bandobastData).forEach(sector => {
-        const { coordinates } = sector;
-        if (coordinates && coordinates.length > 0) {
-          coordinates.forEach(coord => {
-            addGeoJSONLayer({
-              type: 'Feature',
-              geometry: {
-                type: 'Polygon', 
-                coordinates: coord,
-              },
+    onValue(bandobastRef, (snapshot) => {
+      const bandobastData = snapshot.val();
+      if (bandobastData) {
+        // Extracting and display of sectors from database
+        Object.values(bandobastData).forEach(sector => {
+          const { coordinates, title } = sector;
+          if (coordinates && coordinates.length > 0) {
+            coordinates.forEach(coord => {
+              const sectorLayer = L.geoJSON({
+                type: 'Feature',
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: coord,
+                },
+              }).addTo(mapRef.current);
+              addPopupToSector(sectorLayer, title);
             });
-          });
-        }
-      });
-    }
-  });
+          }
+        });
+      }
+    });
 
     const personnelRef = ref(db, 'personnel');
     onValue(personnelRef, (snapshot) => {
@@ -131,6 +136,17 @@ const Map = () => {
       map.remove();
     };
   }, []);
+
+  useEffect(() => {
+    drawnLayers.forEach(layer => {
+      const name = layer.options.name; // Assuming the name of the sector is stored in the options
+      if (name) {
+        const tooltip = L.tooltip({ permanent: true, direction: 'center', className: 'custom-tooltip' }).setContent(name);
+        layer.bindTooltip(tooltip).openTooltip();
+      }
+    });
+  }, [drawnLayers]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,7 +172,7 @@ const Map = () => {
         personnel: [],
         date: '',
         startTime: '',
-        endTime: ''
+        endTime: '',
       });
     } catch (error) {
       console.error('Error saving data: ', error);
