@@ -3,7 +3,7 @@ import { ref, onValue, set, remove } from "firebase/database";
 import { db } from "../config/firebaseConfig";
 import "./Sidebar.css"; // Import CSS file
 
-class Sidebar extends React.Component {
+class ActivatedSectors extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -106,13 +106,16 @@ class Sidebar extends React.Component {
   };
 
   render() {
+    // Filter active sectors
+    const activeSectors = this.state.sectors.filter(sector => sector.active);
+  
     return (
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>Sectors</h2>
         </div>
         <div className="sector-list">
-          {this.state.sectors.map((sector, index) => (
+          {activeSectors.map((sector, index) => (
             <div
               key={index}
               className={`sector ${sector.active ? "active" : ""}`}
@@ -168,4 +171,4 @@ class Sidebar extends React.Component {
   }
 }
 
-export default Sidebar;
+export default ActivatedSectors;

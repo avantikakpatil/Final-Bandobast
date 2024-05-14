@@ -1,5 +1,5 @@
 import React from 'react';
-import Sidebar from './Sidebar'; // Import Sidebar component
+import ActivatedSectors from './ActivatedSectors'; // Import Sidebar component
 import Navbar from './Navbar'; // Import Navbar component
 import ContentMonitor from './ContentMonitor'; // Import MainContent component
 import Header from './Header';
@@ -12,7 +12,7 @@ class Dashboard extends React.Component {
           <Navbar />
           <div className="content">
           <ContentMonitor />
-            <Sidebar />
+            <ActivatedSectors />
           </div>
         </div>
       </div>
