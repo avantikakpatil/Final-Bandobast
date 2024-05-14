@@ -11,6 +11,7 @@ class Sidebar extends React.Component {
       selectedSector: null,
       additionalInfo: {}, // State to hold additional information about the selected sector
       sliderClicked: [], // State to track the number of times the slider has been clicked for each sector
+      personnelData: {}, // State to hold personnel data fetched from Firebase
     };
   }
 
@@ -29,6 +30,15 @@ class Sidebar extends React.Component {
         this.setState({ sectors: sectorNames, sliderClicked: Array(sectorNames.length).fill(0) });
       }
     });
+
+    // Fetch personnel data from Firebase
+    const personnelRef = ref(db, 'personnel');
+    onValue(personnelRef, (snapshot) => {
+      const personnelData = snapshot.val();
+      if (personnelData) {
+        this.setState({ personnelData });
+      }
+    });
   }
 
   handleSectorClick = (sectorIndex) => {
@@ -36,7 +46,7 @@ class Sidebar extends React.Component {
     const selectedSector = this.state.sectors[sectorIndex];
     this.setState({ selectedSector });
 
-    const additionalInfoRef = ref(db, selectedSector.id);
+    const additionalInfoRef = ref(db, `bandobastDetails/${selectedSector.id}`);
     onValue(additionalInfoRef, (snapshot) => {
       const additionalInfo = snapshot.val();
       if (additionalInfo) {
@@ -53,22 +63,27 @@ class Sidebar extends React.Component {
     });
   };
 
-  toggleAdditionalInfo = (event, index) => {
-    event.stopPropagation(); // Stop event propagation to prevent toggling the active state
-    this.setState((prevState) => ({
-      additionalInfo: {
-        ...prevState.additionalInfo,
-        [index]: {
-          ...prevState.additionalInfo[index],
-          show: !prevState.additionalInfo[index]?.show,
-        },
-      },
-    }));
+  toggleAdditionalInfo = (index) => {
+    const selectedSector = this.state.sectors[index];
+    const additionalInfoRef = ref(db, `bandobastDetails/${selectedSector.id}`);
+    
+    onValue(additionalInfoRef, (snapshot) => {
+      const additionalInfo = snapshot.val();
+      if (additionalInfo) {
+        this.setState((prevState) => ({
+          additionalInfo: {
+            ...prevState.additionalInfo,
+            [index]: {
+              show: !prevState.additionalInfo[index]?.show,
+              data: additionalInfo,
+            },
+          },
+        }));
+      }
+    });
   };
 
-  handleSliderClick = (event, index) => {
-    event.stopPropagation();
-
+  handleSliderClick = (index) => {
     const sectorToUpdate = this.state.sectors[index];
     const newActiveStatus = !sectorToUpdate.active;
 
@@ -83,8 +98,7 @@ class Sidebar extends React.Component {
     }
   };
 
-  handleDeleteSector = (event, index) => {
-    event.stopPropagation();
+  handleDeleteSector = (index) => {
     const sectorToDelete = this.state.sectors[index];
     if (window.confirm(`Do you really want to delete the sector "${sectorToDelete.name}"?`)) {
       const sectorRef = ref(db, `bandobastDetails/${sectorToDelete.id}`);
@@ -128,19 +142,19 @@ class Sidebar extends React.Component {
                 />
                 <span
                   className="slider rectangular"
-                  onClick={(event) => this.handleSliderClick(event, index)}
+                  onClick={() => this.handleSliderClick(index)}
                 ></span>
               </label>
               <div className="button-container">
                 <button
                   className="info-button"
-                  onClick={(event) => this.toggleAdditionalInfo(event, index)}
+                  onClick={() => this.toggleAdditionalInfo(index)}
                 >
                   {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
                 </button>
                 <button
                   className="delete-button"
-                  onClick={(event) => this.handleDeleteSector(event, index)}
+                  onClick={() => this.handleDeleteSector(index)}
                 >
                   Delete
                 </button>
@@ -148,13 +162,12 @@ class Sidebar extends React.Component {
               {this.state.additionalInfo[index]?.show &&
                 this.state.additionalInfo[index]?.data && (
                   <div className="additional-info">
-                    <h4>Personnel:</h4>
+                    <h4>Additional Info:</h4>
+                    {/* Display additional info here */}
                     <ul>
-                      {Object.values(
-                        this.state.additionalInfo[index]?.data.personnel
-                      ).map((person, index) => (
-                        <li key={index}>
-                          {person.name} - {person.position}
+                      {this.state.additionalInfo[index]?.data.personnel.map(personnelId => (
+                        <li key={personnelId}>
+                          {this.state.personnelData[personnelId]?.name}
                         </li>
                       ))}
                     </ul>

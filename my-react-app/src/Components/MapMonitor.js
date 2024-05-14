@@ -1,25 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue, push } from 'firebase/database';
+import { ref, onValue, push, set } from 'firebase/database';
+
+import customMarkerIcon from '../maps-flags_447031.png';
 
 import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet-draw/dist/leaflet.draw.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
+import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
 
 const Map = () => {
   const mapRef = React.useRef();
-  const [searchControl, setSearchControl] = useState(null);
+  const [drawnLayers, setDrawnLayers] = useState([]);
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
     personnel: [],
     date: '',
     startTime: '',
-    endTime: '',
-    coordinates: []
+    endTime: ''
+    //coordinates: [] // Include coordinates state
   });
-  const [loader, setLoader] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
+
+  const addGeoJSONLayer = (geoJSON) => {
+    L.geoJSON(geoJSON, {
+      style: {
+        fillColor: 'blue',
+        fillOpacity: 0.4,
+        color: 'blue',
+        weight: 2,
+      },
+    }).addTo(mapRef.current);
+  };
+
+  const addPopupToSector = (layer, sectorName) => {
+    layer.bindPopup(sectorName);
+  };
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -27,10 +46,79 @@ const Map = () => {
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    const searchControl = new L.Control.Geocoder('YOUR_API_KEY_HERE', {
-      defaultMarkGeocode: false,
-    }).addTo(map);
-    setSearchControl(searchControl);
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      draw: {
+        rectangle: true,
+        polygon: true,
+        polyline: true,
+        circle: true,
+        marker: {
+          icon: new L.Icon({
+            iconUrl: customMarkerIcon,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+          }),
+        },
+      },
+      edit: {
+        featureGroup: drawnItems,
+        remove: true,
+      },
+    });
+    map.addControl(drawControl);
+
+    map.on('draw:created', function (event) {
+      const { layer, layerType } = event;
+    
+      switch (layerType) {
+        case 'rectangle':
+        case 'polygon':
+        case 'polyline':
+        case 'circle':
+          drawnItems.addLayer(layer);
+          setDrawnLayers([...drawnLayers, layer]);
+          const geometry = layer.toGeoJSON();
+          setBandobastDetails({ ...bandobastDetails, geometry });
+          setShowForm(true);
+
+          break;
+        case 'marker':
+        case 'circlemarker':
+          
+          break;
+        default:
+          break;
+      }
+    });
+  
+    // Fetch active sectors from Firebase
+    const sectorsRef = ref(db, 'sectors');
+    onValue(sectorsRef, (snapshot) => {
+      const sectorsData = snapshot.val();
+      if (sectorsData) {
+        // Filter out active sectors
+        const activeSectors = Object.values(sectorsData).filter(sector => sector.active);
+        // Display active sectors on the map
+        activeSectors.forEach(sector => {
+          const { coordinates, title } = sector;
+          if (coordinates && coordinates.length > 0) {
+            coordinates.forEach(coord => {
+              const sectorLayer = L.geoJSON({
+                type: 'Feature',
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: coord,
+                },
+              }).addTo(mapRef.current);
+              addPopupToSector(sectorLayer, title);
+            });
+          }
+        });
+      }
+    });
 
     const personnelRef = ref(db, 'personnel');
     onValue(personnelRef, (snapshot) => {
@@ -49,39 +137,35 @@ const Map = () => {
     };
   }, []);
 
+  useEffect(() => {
+    drawnLayers.forEach(layer => {
+      const name = layer.options.name; // Assuming the name of the sector is stored in the options
+      if (name) {
+        const tooltip = L.tooltip({ permanent: true, direction: 'center', className: 'custom-tooltip' }).setContent(name);
+        layer.bindTooltip(tooltip).openTooltip();
+      }
+    });
+  }, [drawnLayers]);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoader(true);
-
     try {
-      // Fetch personnel names from Firebase
-      const personnelNames = await Promise.all(
-        bandobastDetails.personnel.map(async (personnelId) => {
-          const personnelRef = ref(db, `personnel/${personnelId}`);
-          let personnelData;
-          await onValue(personnelRef, (snapshot) => {
-            personnelData = snapshot.val();
-          });
-          return personnelData.name; // Return only the name
-        })
-      );
+      
+      const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
 
-      // Get coordinates from drawn layers
-      const coordinates = bandobastDetails.coordinates.map(geometry => geometry.coordinates);
-
-      // Update bandobastDetails with personnel names and coordinates
+      // Update bandobastDetails with coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
-        personnelNames: personnelNames, // Add personnel names
         coordinates: coordinates
       };
 
       // Save updated data to the database
-      await push(ref(db, 'bandobastDetails'), updatedBandobastDetails);
+      const bandobastRef = ref(db, 'bandobastDetails');
+      const newBandobastRef = push(bandobastRef);
+      set(newBandobastRef, updatedBandobastDetails);
 
-      // Reset the form data and loader state
       setShowForm(false);
-      setLoader(false);
       alert('Data saved successfully!');
       setBandobastDetails({
         title: '',
@@ -89,12 +173,10 @@ const Map = () => {
         date: '',
         startTime: '',
         endTime: '',
-        coordinates: []
       });
     } catch (error) {
       console.error('Error saving data: ', error);
       alert('Error saving data: ' + error.message);
-      setLoader(false);
     }
   };
 
@@ -142,9 +224,9 @@ const Map = () => {
               <label>Duration To:</label>
               <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }} disabled={loader}>Create Bandobast</button>
+            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Create Bandobast</button>
             <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={() => setShowForm(false)}>×</button>
+              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={handleCloseForm}>×</button>
             </div>
           </form>
         </div>
