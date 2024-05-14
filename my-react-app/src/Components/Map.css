@@ -50,3 +50,33 @@
 .modal-open #map {
   pointer-events: none;
 }
+.red-border {
+  stroke: red !important;
+  stroke-width: 3px;
+}
+
+.sector-tooltip {  /*Displays sector name on hovering the cursor*/
+  background-color: white;
+  border: 1px solid #999;
+  padding: 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* CSS for Leaflet popups */
+.leaflet-popup-content-wrapper {
+  background-color: white;
+  color: black;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-tip-container {
+  display: none; /* Hide the default Leaflet popup arrow */
+}
+
