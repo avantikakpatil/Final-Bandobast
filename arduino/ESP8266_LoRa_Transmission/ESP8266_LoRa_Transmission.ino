@@ -1,3 +1,4 @@
+
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <LoRa.h>
@@ -6,9 +7,9 @@
 #define RST 16
 #define DIO0 2
 
-const char *ssid = "Ninad";
-const char *password = "Ninad1234";
-const char *serverIP = "192.168.172.153";
+const char *ssid = "CCLAB-34 1169";
+const char *password = "12345678";
+const char *serverIP = "192.168.137.231";
 const int serverPort = 80;
 const int loraFrequency = 433E6;
 
