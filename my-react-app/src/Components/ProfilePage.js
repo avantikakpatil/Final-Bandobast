@@ -3,7 +3,7 @@ import Header from './Header';
 import Navbar from './Navbar';
 import './ProfilePage.css'; 
 import { db, auth } from '../config/firebaseConfig';
-import { ref , push, update } from 'firebase/database';
+import { ref, get, update } from 'firebase/database';
 
 const UserProfile = () => {
   const [formData, setFormData] = useState({
@@ -11,30 +11,36 @@ const UserProfile = () => {
     lastName: '',
     id: '',
     mobile: '',
-    email: '',
-    password: '',
+    email: ''
   });
-
-  const [userId, setUserId] = useState('');
-  const [userPassword, setUserPassword] = useState('');
 
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUserId(user.uid);
-      setUserPassword(user.password); // Assuming user password is accessible
+      try {
+        const userRef = ref(db, 'userDetails', user.uid);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            setFormData({
+              firstName: userData.firstName || '',
+              lastName: userData.lastName || '',
+              id: user.uid,
+              mobile: userData.mobile || '',
+              email: userData.email || ''
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
     }
   }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const userRef = ref(db, 'userDetails', userId); 
+      const userRef = ref(db, 'userDetails', formData.id); 
       await update(userRef, formData); 
       console.log('Data saved successfully!');
     } catch (error) {
@@ -42,9 +48,14 @@ const UserProfile = () => {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
   return (
     <div>
-      <Header />
+      <Header userName={`${formData.firstName} ${formData.lastName}`} />
       <div className="dashboard">
         <Navbar />
         <div >
@@ -60,7 +71,7 @@ const UserProfile = () => {
             </div>
             <div className="form-group">
               <label>User ID:</label>
-              <input type="text" name="id" value={userId} readOnly />
+              <input type="text" name="id" value={formData.id} readOnly />
             </div>
             <div className="form-group">
               <label>Mobile:</label>
@@ -69,10 +80,6 @@ const UserProfile = () => {
             <div className="form-group">
               <label>Email:</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>Password:</label>
-              <input type="password" name="password" value={userPassword} readOnly />
             </div>
             <button type="submit" className="submit-button">Update Profile</button>
           </form>
