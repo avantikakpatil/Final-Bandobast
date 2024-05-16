@@ -102,22 +102,25 @@ class Sidebar extends React.Component {
     const sectorToDelete = this.state.sectors[index];
     if (window.confirm(`Do you really want to delete the sector "${sectorToDelete.name}"?`)) {
       const sectorRef = ref(db, `bandobastDetails/${sectorToDelete.id}`);
-      remove(sectorRef).then(() => {
-        // Remove the sector from the local state
-        this.setState((prevState) => {
-          const sectors = [...prevState.sectors];
-          sectors.splice(index, 1);
-          const sliderClicked = [...prevState.sliderClicked];
-          sliderClicked.splice(index, 1);
-          const additionalInfo = { ...prevState.additionalInfo };
-          delete additionalInfo[index];
-          return { sectors, sliderClicked, additionalInfo };
+      remove(sectorRef)
+        .then(() => {
+          // Remove the sector from the local state
+          this.setState((prevState) => {
+            const sectors = [...prevState.sectors];
+            sectors.splice(index, 1);
+            const sliderClicked = [...prevState.sliderClicked];
+            sliderClicked.splice(index, 1);
+            const additionalInfo = { ...prevState.additionalInfo };
+            delete additionalInfo[index];
+            return { sectors, sliderClicked, additionalInfo };
+          });
+        })
+        .catch((error) => {
+          console.error("Error deleting sector:", error);
         });
-      }).catch((error) => {
-        console.error("Error deleting sector:", error);
-      });
     }
   };
+  
 
   render() {
     return (
