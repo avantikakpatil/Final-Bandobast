@@ -1,13 +1,13 @@
 import React from 'react';
-import Sidebar from './Sidebar'; // Import Sidebar component
-import Navbar from './Navbar'; // Import Navbar component
-import MainContent from './MainContent'; // Import MainContent component
+import Sidebar from './Sidebar'; 
+import Navbar from './Navbar'; 
+import MainContent from './MainContent';
 import Header from './Header';
 class Dashboard extends React.Component {
   render() {
     return (
       <div>
-        <Header /> {/* Include Header component */}
+        <Header /> 
         <div className="dashboard">
           <Navbar />
           <div className="content">
