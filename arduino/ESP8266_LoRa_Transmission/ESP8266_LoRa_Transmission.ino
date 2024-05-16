@@ -7,9 +7,9 @@
 #define RST 16
 #define DIO0 2
 
-const char *ssid = "CCLAB-34 1169";
-const char *password = "12345678";
-const char *serverIP = "192.168.137.231";
+const char *ssid = "realme 7";
+const char *password = "11223344";
+const char *serverIP = "192.168.229.129";
 const int serverPort = 80;
 const int loraFrequency = 433E6;
 

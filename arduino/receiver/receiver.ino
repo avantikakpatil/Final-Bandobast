@@ -8,8 +8,8 @@
 #define RST 16
 #define DIO0 5
 
-const char *ssid = "Ninad";
-const char *password = "Ninad123";
+const char *ssid = "realme 7";
+const char *password = "11223344";
 const char *firebaseHost = "final-band-o-bast.firebaseapp.com";
 const char *firebaseAuth = "AIzaSyDlodufxD85YZO35-RX0qk3teTsMNV7kVE";
 

@@ -4,8 +4,8 @@
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
 
-const char *ssid = "CCLAB-34 1169";
-const char *password = "12345678";
+const char *ssid = "realme 7";
+const char *password = "11223344";
 
 // Server settings
 ESP8266WebServer server(80);
