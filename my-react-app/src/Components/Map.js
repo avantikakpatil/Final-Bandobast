@@ -19,8 +19,8 @@ const Map = () => {
     personnel: [],
     date: '',
     startTime: '',
-    endTime: ''
-    //coordinates: [] // Include coordinates state
+    endTime: '',
+    coordinates: [] 
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
@@ -35,6 +35,8 @@ const Map = () => {
       },
     }).addTo(mapRef.current);
   };
+
+  
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
     mapRef.current = map;
@@ -67,27 +69,40 @@ const Map = () => {
 
     map.on('draw:created', function (event) {
       const { layer, layerType } = event;
-    
+      
       switch (layerType) {
         case 'rectangle':
-        case 'polygon':
-        case 'polyline':
-        case 'circle':
-          drawnItems.addLayer(layer);
-          setDrawnLayers([...drawnLayers, layer]);
-          const geometry = layer.toGeoJSON();
-          setBandobastDetails({ ...bandobastDetails, geometry });
-          setShowForm(true);
-
-          break;
-        case 'marker':
-        case 'circlemarker':
-          
-          break;
-        default:
-          break;
-      }
-    });
+case 'polygon':
+  drawnItems.addLayer(layer);
+  setDrawnLayers([...drawnLayers, layer]);
+  const polygonGeometry = layer.toGeoJSON(); // Rename to polygonGeometry
+  setBandobastDetails({ ...bandobastDetails, geometry: polygonGeometry });
+  setShowForm(true);
+  break;
+case 'polyline':
+case 'circle':
+  drawnItems.addLayer(layer);
+  setDrawnLayers([...drawnLayers, layer]);
+  const circleCenter = layer.getLatLng();
+  const circleRadius = layer.getRadius();
+  const circlePoints = [];
+  const numSegments = 64;
+  for (let i = 0; i < numSegments; i++) {
+    const angle = (Math.PI / 180) * (i * (360 / numSegments));
+    const x = circleCenter.lat + circleRadius * Math.cos(angle);
+    const y = circleCenter.lng + circleRadius * Math.sin(angle);
+    circlePoints.push([x, y]);
+  }
+  const circleGeometry = {
+    type: 'Polygon',
+    coordinates: [circlePoints],
+  };
+  setBandobastDetails({ ...bandobastDetails, geometry: circleGeometry });
+  setShowForm(true);
+  break; 
+}
+});
+    
   
     function addPopupToSector(layer, sectorName) {
       layer.bindPopup(sectorName);
