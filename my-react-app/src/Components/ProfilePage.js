@@ -3,7 +3,7 @@ import Header from './Header';
 import Navbar from './Navbar';
 import './ProfilePage.css'; 
 import { db, auth } from '../config/firebaseConfig';
-import { ref, update } from 'firebase/database';
+import { ref , push, update } from 'firebase/database';
 
 const UserProfile = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const UserProfile = () => {
     const user = auth.currentUser;
     if (user) {
       setUserId(user.uid);
-      setUserPassword(user.password); 
+      setUserPassword(user.password); // Assuming user password is accessible
     }
   }, []);
 
@@ -34,7 +34,7 @@ const UserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const userRef = ref(db, 'userDetails', userId);
+      const userRef = ref(db, 'userDetails', userId); 
       await update(userRef, formData); 
       console.log('Data saved successfully!');
     } catch (error) {
@@ -47,8 +47,8 @@ const UserProfile = () => {
       <Header />
       <div className="dashboard">
         <Navbar />
-        <div>
-          <h2 className='header_profile'>User Profile</h2>
+        <div >
+          <h2 className='header'>User Profile</h2>
           <form className="user-profile-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label>First Name:</label>
@@ -58,7 +58,10 @@ const UserProfile = () => {
               <label>Last Name:</label>
               <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
             </div>
-            
+            <div className="form-group">
+              <label>User ID:</label>
+              <input type="text" name="id" value={userId} readOnly />
+            </div>
             <div className="form-group">
               <label>Mobile:</label>
               <input type="text" name="mobile" value={formData.mobile} onChange={handleChange} required />
