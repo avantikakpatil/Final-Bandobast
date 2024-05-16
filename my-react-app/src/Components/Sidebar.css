@@ -86,7 +86,7 @@ input:checked + .slider:before {
 }
 
 .info-button, .delete-button {
-  width: 110px; /* Slightly less than half to add some space between the buttons */
+  width: 48%; /* Slightly less than half to add some space between the buttons */
   padding: 5px;
   text-align: center;
 }
