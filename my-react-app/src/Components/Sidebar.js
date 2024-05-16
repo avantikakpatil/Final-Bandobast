@@ -2,6 +2,7 @@ import React from "react";
 import { ref, onValue, set, remove } from "firebase/database";
 import { db } from "../config/firebaseConfig";
 import "./Sidebar.css"; // Import CSS file
+import EditSectorForm from "./EditSectorForm";
 
 class Sidebar extends React.Component {
   constructor(props) {
@@ -11,7 +12,9 @@ class Sidebar extends React.Component {
       selectedSector: null,
       additionalInfo: {}, // State to hold additional information about the selected sector
       sliderClicked: [], // State to track the number of times the slider has been clicked for each sector
-      personnelData: {}, // State to hold personnel data fetched from Firebase
+      personnelData: {},
+      showEditForm: false, // State to control whether to show the edit form
+      editSectorIndex: null, // State to hold the index of the sector being edited
     };
   }
 
@@ -120,7 +123,14 @@ class Sidebar extends React.Component {
         });
     }
   };
-  
+
+  handleEditButtonClick = (index) => {
+    this.setState({ showEditForm: true, editSectorIndex: index });
+  };
+
+  handleEditFormClose = () => {
+    this.setState({ showEditForm: false, editSectorIndex: null });
+  };
 
   render() {
     return (
@@ -156,6 +166,12 @@ class Sidebar extends React.Component {
                   {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
                 </button>
                 <button
+                  className="edit-button" 
+                  onClick={() => this.handleEditButtonClick(index)} 
+                >
+                  Edit
+                </button>
+                <button
                   className="delete-button"
                   onClick={() => this.handleDeleteSector(index)}
                 >
@@ -179,6 +195,18 @@ class Sidebar extends React.Component {
             </div>
           ))}
         </div>
+        {this.state.showEditForm && (
+          <EditSectorForm
+            existingBandobastDetails={this.state.sectors[this.state.editSectorIndex]}
+            onClose={this.handleEditFormClose}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+        )}
       </div>
     );
   }
