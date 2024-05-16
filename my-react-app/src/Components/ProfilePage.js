@@ -1,64 +1,78 @@
-import React from 'react';
-
+import React, { useState, useEffect } from 'react';
+import Header from './Header';
+import Navbar from './Navbar';
+import './ProfilePage.css'; 
+import { db, auth } from '../config/firebaseConfig';
+import { ref, update } from 'firebase/database';
 
 const UserProfile = () => {
-  return (
-    <div className="container">
-      <h1>Profile Info</h1>
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    id: '',
+    mobile: '',
+    email: '',
+    password: '',
+  });
 
-      <div className="row">
-        <div className="col-md-4 mb-3">
-          <div className="card">
-            <div className="card-body">
-              <div className="d-flex flex-column align-items-center text-center">
-                <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" className="rounded-circle" width="150" />
-                <p className="text-secondary mb-1">JobTitle</p>
-                <p className="text-muted font-size-sm">Address</p>
-              </div>
+  const [userId, setUserId] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setUserId(user.uid);
+      setUserPassword(user.password); 
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const userRef = ref(db, 'userDetails', userId);
+      await update(userRef, formData); 
+      console.log('Data saved successfully!');
+    } catch (error) {
+      console.error('Error saving user data:', error);
+    }
+  };
+
+  return (
+    <div>
+      <Header />
+      <div className="dashboard">
+        <Navbar />
+        <div>
+          <h2 className='header_profile'>User Profile</h2>
+          <form className="user-profile-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>First Name:</label>
+              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
             </div>
-          </div>
-        </div>
-        <div className="col-md-8">
-          <div className="card mb-3">
-            <div className="card-body">
-              <div className="row">
-                <div className="col-sm-3">
-                  <h6 className="mb-0">Full Name</h6>
-                </div>
-                <div className="col-sm-9 text-secondary">
-                  Kenneth Valdez
-                </div>
-              </div>
-              <hr />
-              <div className="row">
-                <div className="col-sm-3">
-                  <h6 className="mb-0">Email</h6>
-                </div>
-                <div className="col-sm-9 text-secondary">
-                  fip@jukmuh.al
-                </div>
-              </div>
-              <hr />
-              <div className="row">
-                <div className="col-sm-3">
-                  <h6 className="mb-0">Mobile</h6>
-                </div>
-                <div className="col-sm-9 text-secondary">
-                  (320) 380-4539
-                </div>
-              </div>
-              <hr />
-              <div className="row">
-                <div className="col-sm-3">
-                  <h6 className="mb-0">Address</h6>
-                </div>
-                <div className="col-sm-9 text-secondary">
-                  Bay Area, San Francisco, CA
-                </div>
-              </div>
-              <hr />
+            <div className="form-group">
+              <label>Last Name:</label>
+              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
             </div>
-          </div>
+            
+            <div className="form-group">
+              <label>Mobile:</label>
+              <input type="text" name="mobile" value={formData.mobile} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Email:</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Password:</label>
+              <input type="password" name="password" value={userPassword} readOnly />
+            </div>
+            <button type="submit" className="submit-button">Update Profile</button>
+          </form>
         </div>
       </div>
     </div>
