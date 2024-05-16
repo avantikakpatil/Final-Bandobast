@@ -1,51 +1,68 @@
 .user-profile-container {
-    max-width: 600px;
-    margin: 0 , auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  
-  .header_profile{
-   align-items: center;
-   padding-left: 30%;
-  
-  }
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 2px solid #007bff; /* Add a solid border with a primary color */
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
+  text-align: center; /* Center align all text */
+}
 
-  .user-profile-form {
-    display: flex;
-    flex-direction: column;
-    margin-left: 15px;
-    padding-left: 15%;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  label {
-    font-weight: bold;
-  }
-  
-  input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .submit-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .submit-button:hover {
-    background-color: #0056b3;
-  }
-  
+.header_profile {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.user-profile-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Align form items at the center */
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left; /* Align form labels to the left */
+  width: 100%; /* Make form group take full width */
+}
+
+label {
+  font-weight: bold;
+  color: #555;
+}
+
+input {
+  width: calc(100% - 20px); /* Adjust input width to fit within form group */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.submit-button {
+  width: calc(100% - 20px); /* Adjust button width to fit within form group */
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+/* Input Field Focus */
+input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Button Hover Effect */
+.submit-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
