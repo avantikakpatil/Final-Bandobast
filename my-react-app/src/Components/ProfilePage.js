@@ -55,7 +55,7 @@ const UserProfile = () => {
 
   return (
     <div>
-      <Header userName={`${formData.firstName} ${formData.lastName}`} />
+      <Header userName={`${formData.firstName} ${formData.lastName}`} /> {/* Pass userName prop */}
       <div className="dashboard">
         <Navbar />
         <div >
