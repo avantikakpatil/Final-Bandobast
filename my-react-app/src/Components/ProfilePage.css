@@ -1,222 +1,68 @@
-/* App.css */
-
-body,
-html {
-  margin: 0;
-  padding: 0;
+.user-profile-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 2px solid #007bff; /* Add a solid border with a primary color */
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
+  text-align: center; /* Center align all text */
 }
 
-.App {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.dashboard {
-  display: flex;
-  flex: 1;
-}
-
-.content {
-  display: flex;
-  flex: 1; /* Fill remaining space */
-}
-
-/* Add your custom styles for the navbar component here */
-
-/* Navbar styles */
-.navbar {
-  background-color: #ffffff;
-  padding: 10px;
-  width: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-
-
-
-.navbar-menu {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-.navbar-menu li {
-  margin-bottom: 15px;
-}
-
-.navbar-menu li a {
+.header_profile {
+  margin-bottom: 20px;
   color: #333;
-  text-decoration: none;
-  font-size: 16px;
+}
+
+.user-profile-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  position: relative;
-  transition: transform 0.2s;
+  align-items: center; /* Align form items at the center */
 }
 
-.navbar-menu li a:hover {
-  transform: scale(1.1);
+.form-group {
+  margin-bottom: 20px;
+  text-align: left; /* Align form labels to the left */
+  width: 100%; /* Make form group take full width */
 }
 
-.navbar-icon {
-  width: 30px;
-  height: 30px;
-  margin-bottom: 5px;
-  transition: transform 0.3s;
+label {
+  font-weight: bold;
+  color: #555;
 }
 
-.navbar-icon:hover {
-  transform: scale(1.2);
-}
-
-.navbar-icon:hover::after {
-  content: attr(alt);
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  padding: 5px 10px;
+input {
+  width: calc(100% - 20px); /* Adjust input width to fit within form group */
+  padding: 10px;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 14px;
 }
 
-
-
-
-/* Responsive styles */
-@media screen and (max-width: 768px) {
-  .navbar-menu li {
-    margin-bottom: 5px; /* Reduce spacing between menu items */
-  }
-
-  .navbar-icon {
-    width: 30px; /* Decrease width of logos */
-    height: 30px; /* Decrease height of logos */
-  }
-}
-
-
-
-
-
-/* Add your custom styles for the sidebar component here */
-
-.sidebar {
-  width: 250px; /* Adjust width as needed */
-  height: 100%; /* Occupy full height of its container */
-  background-color: #f0f0f0; /* Example background color */
-  /* Add any other necessary styles */
-}
-
-.sidebar-header {
+.submit-button {
+  width: calc(100% - 20px); /* Adjust button width to fit within form group */
   padding: 10px;
-  background-color: #ccc; /* Example background color */
-}
-
-.sector-list {
-  overflow-y: auto; /* Enable vertical scroll if needed */
-  max-height: calc(100% - 100px); /* Adjust max height to leave space for header and footer */
-}
-
-.sector {
-  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  border-bottom: 1px solid #ddd; /* Example border style */
+  transition: background-color 0.3s ease;
 }
 
-.selected-sector-info {
-  padding: 10px;
-  background-color: #eaeaea; /* Example background color */
+.submit-button:hover {
+  background-color: #0056b3;
 }
 
-/* Add any other necessary styles */
-
-
-.main-content {
-  padding: 5px;
-  flex-grow: 1;
+/* Input Field Focus */
+input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-
-/* Header styles */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-}
-
-.header-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #26349c;
-  margin-right: auto;
-  display: flex; /* Align items horizontally */
-  align-items: center; /* Center items vertically */
-}
-
-/* Adjust the logo size */
-.system-logo {
-  width: 40px;
-  height: auto;
-  margin-right: 10px;
-}
-
-.header-profile {
-  display: flex;
-  align-items: center;
-}
-
-.profile-icon {
-  width: 30px;
-  height: 30px;
-  margin-right: 10px;
-}
-
-.profile-name {
-  font-weight: bold;
-}
-.system-logo {
-  width: 40px; /* Adjust the width as needed */
-  height: auto; /* Maintain aspect ratio */
-  margin-right: 10px; /* Add any additional styling */
-}
-
-
-.header-profile {
-  display: flex;
-  align-items: center; /* Align items vertically */
-}
-
-.profile-icon {
-  width: 30px; /* Adjust width as needed */
-  height: 30px; /* Adjust height as needed */
-  margin-right: 10px; /* Spacing between icon and name */
-}
-
-.profile-name {
-  font-weight: bold; /* Bold font for the user's name */
-  /* Additional styles for the user's name */
-}
-/* App.css */
-
-.notification-icon {
-  width: 30px; /* Adjust width as needed */
-  height: 30px; /* Adjust height as needed */
-  margin-right: 10px; /* Spacing between notification icon and profile icon */
-}
-
-/* Map.css or App.css */
-
-.main-content{
-  border: 2px solid #ccc; /* Example border style */
-  border-radius: 5px; /* Optional: Add border radius for rounded corners */
-  padding: 10px; /* Optional: Add padding for spacing */
+/* Button Hover Effect */
+.submit-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
