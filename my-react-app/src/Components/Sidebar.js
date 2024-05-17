@@ -15,6 +15,7 @@ class Sidebar extends React.Component {
       personnelData: {},
       showEditForm: false, // State to control whether to show the edit form
       editSectorIndex: null, // State to hold the index of the sector being edited
+      sortBy: 'latest', // State to control sorting option
     };
   }
 
@@ -29,8 +30,12 @@ class Sidebar extends React.Component {
           name: value.title,
           personnel: value.personnel, // Include personnel information
           active: value.isActive || false, // Include active status, default to false if not available
+          date: value.date || new Date().toISOString(), // Include date, default to current date if not available
         }));
-        this.setState({ sectors: sectorNames, sliderClicked: Array(sectorNames.length).fill(0) });
+        this.setState({ 
+          sectors: this.sortSectors(sectorNames, this.state.sortBy), 
+          sliderClicked: Array(sectorNames.length).fill(0) 
+        });
       }
     });
 
@@ -43,6 +48,24 @@ class Sidebar extends React.Component {
       }
     });
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.sortBy !== this.state.sortBy) {
+      this.setState((prevState) => ({
+        sectors: this.sortSectors(prevState.sectors, this.state.sortBy),
+      }));
+    }
+  }
+
+  sortSectors = (sectors, sortBy) => {
+    const sortedSectors = sectors.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return sortBy === 'latest' ? sortedSectors.reverse() : sortedSectors;
+  };
+
+  handleSortChange = (e) => {
+    const sortBy = e.target.value;
+    this.setState({ sortBy });
+  };
 
   handleSectorClick = (sectorIndex) => {
     // Fetch additional information for the selected sector
@@ -137,6 +160,10 @@ class Sidebar extends React.Component {
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>Sectors</h2>
+          <select value={this.state.sortBy} onChange={this.handleSortChange}>
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+          </select>
         </div>
         <div className="sector-list">
           {this.state.sectors.map((sector, index) => (

@@ -2,8 +2,12 @@
   height: 590px;
   overflow-y: auto; /* Add scrollbar when content overflows */
 }
+
 .sidebar-header {
   padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .sidebar-header h2 {
@@ -85,8 +89,8 @@ input:checked + .slider:before {
   width: 100%;
 }
 
-.info-button, .delete-button {
-  width: 100%; /* Slightly less than half to add some space between the buttons */
+.info-button, .delete-button, .edit-button {
+  width: 30%; /* Slightly less than half to add some space between the buttons */
   padding: 5px;
   justify-content: space-between;
   text-align: center;
