@@ -1,3 +1,4 @@
+
 .sidebar {
   height: 590px;
   overflow-y: auto; /* Add scrollbar when content overflows */
@@ -94,4 +95,13 @@ input:checked + .slider:before {
   padding: 5px;
   justify-content: space-between;
   text-align: center;
+}
+
+.sort-dropdowns {
+  display: flex;
+  align-items: center;
+}
+
+.sort-dropdowns select {
+  margin-left: 10px;
 }

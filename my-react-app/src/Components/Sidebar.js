@@ -16,6 +16,7 @@ class Sidebar extends React.Component {
       showEditForm: false, // State to control whether to show the edit form
       editSectorIndex: null, // State to hold the index of the sector being edited
       sortBy: 'latest', // State to control sorting option
+      sortType: 'date' // State to control sorting type (date or time)
     };
   }
 
@@ -33,7 +34,7 @@ class Sidebar extends React.Component {
           date: value.date || new Date().toISOString(), // Include date, default to current date if not available
         }));
         this.setState({ 
-          sectors: this.sortSectors(sectorNames, this.state.sortBy), 
+          sectors: this.sortSectors(sectorNames, this.state.sortBy, this.state.sortType), 
           sliderClicked: Array(sectorNames.length).fill(0) 
         });
       }
@@ -50,21 +51,34 @@ class Sidebar extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.sortBy !== this.state.sortBy) {
+    if (prevState.sortBy !== this.state.sortBy || prevState.sortType !== this.state.sortType) {
       this.setState((prevState) => ({
-        sectors: this.sortSectors(prevState.sectors, this.state.sortBy),
+        sectors: this.sortSectors(prevState.sectors, this.state.sortBy, this.state.sortType),
       }));
     }
   }
 
-  sortSectors = (sectors, sortBy) => {
-    const sortedSectors = sectors.sort((a, b) => new Date(a.date) - new Date(b.date));
-    return sortBy === 'latest' ? sortedSectors.reverse() : sortedSectors;
+  sortSectors = (sectors, sortBy, sortType) => {
+    const sortedSectors = sectors.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      const timeA = new Date(a.date).getTime();
+      const timeB = new Date(b.date).getTime();
+      
+      if (sortType === 'time') {
+        return sortBy === 'latest' ? timeB - timeA : timeA - timeB;
+      } else {
+        return sortBy === 'latest' ? dateB - dateA : dateA - dateB;
+      }
+    });
+
+    return sortedSectors;
   };
 
   handleSortChange = (e) => {
     const sortBy = e.target.value;
-    this.setState({ sortBy });
+    const sortType = e.target.name;
+    this.setState({ sortBy, sortType });
   };
 
   handleSectorClick = (sectorIndex) => {
@@ -160,9 +174,13 @@ class Sidebar extends React.Component {
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>Sectors</h2>
-          <select value={this.state.sortBy} onChange={this.handleSortChange}>
-            <option value="latest">Latest</option>
-            <option value="oldest">Oldest</option>
+          <select value={this.state.sortBy} name="date" onChange={this.handleSortChange}>
+            <option value="latest">Latest Date</option>
+            <option value="oldest">Oldest Date</option>
+          </select>
+          <select value={this.state.sortBy} name="time" onChange={this.handleSortChange}>
+            <option value="latest">Latest Time</option>
+            <option value="oldest">Oldest Time</option>
           </select>
         </div>
         <div className="sector-list">
