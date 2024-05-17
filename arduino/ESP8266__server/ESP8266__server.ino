@@ -52,7 +52,7 @@ void loop() {
         handlePostGPSData();
       }
 //      delay(3000);
-      Serial.println(WiFi.localIP());
+//      Serial.println(WiFi.localIP());
     }
   }
 }
