@@ -173,16 +173,20 @@ class Sidebar extends React.Component {
     return (
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>Sectors</h2>
-          <select value={this.state.sortBy} name="date" onChange={this.handleSortChange}>
-            <option value="latest">Latest Date</option>
-            <option value="oldest">Oldest Date</option>
-          </select>
-          <select value={this.state.sortBy} name="time" onChange={this.handleSortChange}>
-            <option value="latest">Latest Time</option>
-            <option value="oldest">Oldest Time</option>
-          </select>
-        </div>
+  <h2>Sectors</h2>
+  <div className="sort-dropdown">
+    
+    <select value={this.state.sortBy} onChange={this.handleSortChange}>
+      <option value="latest">Latest Date</option>
+      <option value="oldest">Oldest Date</option>
+    </select>
+    <select value={this.state.sortBy} onChange={this.handleSortChange}>
+      <option value="latest">Latest Time</option>
+      <option value="oldest">Oldest Time</option>
+    </select>
+  </div>
+</div>
+
         <div className="sector-list">
           {this.state.sectors.map((sector, index) => (
             <div
@@ -241,20 +245,16 @@ class Sidebar extends React.Component {
           ))}
         </div>
         {this.state.showEditForm && (
+        <div className="edit-form-container">
           <EditSectorForm
             existingBandobastDetails={this.state.sectors[this.state.editSectorIndex]}
             onClose={this.handleEditFormClose}
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
           />
-        )}
-      </div>
-    );
-  }
+        </div>
+      )}
+    </div>
+  );
+}
 }
 
 export default Sidebar;
