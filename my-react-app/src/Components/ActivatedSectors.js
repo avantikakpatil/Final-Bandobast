@@ -11,7 +11,10 @@ class ActivatedSectors extends React.Component {
       selectedSector: null,
       additionalInfo: {}, // State to hold additional information about the selected sector
       sliderClicked: [], // State to track the number of times the slider has been clicked for each sector
+      personnelData: {}, // State to hold personnel data
+      countdowns: {} // State to hold countdown times for each sector
     };
+    this.timers = {}; // Hold setTimeout references to clear them later
   }
 
   componentDidMount() {
@@ -25,10 +28,77 @@ class ActivatedSectors extends React.Component {
           name: value.title,
           personnel: value.personnel, // Include personnel information
           active: value.isActive || false, // Include active status, default to false if not available
+          startTime: value.startTime,
+          endTime: value.endTime
         }));
-        this.setState({ sectors: sectorNames, sliderClicked: Array(sectorNames.length).fill(0) });
+        this.setState({ 
+          sectors: sectorNames, 
+          sliderClicked: Array(sectorNames.length).fill(0) 
+        }, this.initializeCountdowns);
       }
     });
+  
+    // Fetch personnel data from Firebase
+    const personnelRef = ref(db, 'personnel');
+    onValue(personnelRef, (snapshot) => {
+      const personnelData = snapshot.val();
+      if (personnelData) {
+        this.setState({ personnelData });
+      }
+    });
+  }
+
+  initializeCountdowns = () => {
+    this.state.sectors.forEach((sector, index) => {
+      if (sector.active) {
+        this.startCountdown(index);
+      }
+    });
+  }
+
+  startCountdown = (index) => {
+    const update = () => {
+      this.updateCountdown(index);
+    };
+    this.updateCountdown(index);
+    this.timers[index] = setInterval(update, 1000);
+  }
+
+  stopCountdown = (index) => {
+    clearInterval(this.timers[index]);
+    this.timers[index] = null;
+  }
+
+  updateCountdown = (index) => {
+    const sector = this.state.sectors[index];
+    const endTime = new Date(sector.endTime).getTime();
+    const now = new Date().getTime();
+    const remainingTime = endTime - now;
+
+    if (remainingTime > 0) {
+      this.setState(prevState => ({
+        countdowns: {
+          ...prevState.countdowns,
+          [index]: this.formatCountdown(remainingTime)
+        }
+      }));
+    } else {
+      this.setState(prevState => ({
+        countdowns: {
+          ...prevState.countdowns,
+          [index]: "00:00:00"
+        }
+      }));
+      this.stopCountdown(index);
+    }
+  }
+
+  formatCountdown = (milliseconds) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
   }
 
   handleSectorClick = (sectorIndex) => {
@@ -36,7 +106,7 @@ class ActivatedSectors extends React.Component {
     const selectedSector = this.state.sectors[sectorIndex];
     this.setState({ selectedSector });
 
-    const additionalInfoRef = ref(db, selectedSector.id);
+    const additionalInfoRef = ref(db, `bandobastDetails/${selectedSector.id}`);
     onValue(additionalInfoRef, (snapshot) => {
       const additionalInfo = snapshot.val();
       if (additionalInfo) {
@@ -53,8 +123,7 @@ class ActivatedSectors extends React.Component {
     });
   };
 
-  toggleAdditionalInfo = (event, index) => {
-    event.stopPropagation(); // Stop event propagation to prevent toggling the active state
+  toggleAdditionalInfo = (index) => {
     this.setState((prevState) => ({
       additionalInfo: {
         ...prevState.additionalInfo,
@@ -66,9 +135,7 @@ class ActivatedSectors extends React.Component {
     }));
   };
 
-  handleSliderClick = (event, index) => {
-    event.stopPropagation();
-
+  handleSliderClick = (index) => {
     const sectorToUpdate = this.state.sectors[index];
     const newActiveStatus = !sectorToUpdate.active;
 
@@ -80,28 +147,43 @@ class ActivatedSectors extends React.Component {
 
       // Update the Firebase database
       set(ref(db, `bandobastDetails/${sectorToUpdate.id}/isActive`), newActiveStatus);
+
+      if (newActiveStatus) {
+        this.startCountdown(index);
+      } else {
+        this.stopCountdown(index);
+        this.setState(prevState => ({
+          countdowns: {
+            ...prevState.countdowns,
+            [index]: null
+          }
+        }));
+      }
     }
   };
 
-  handleDeleteSector = (event, index) => {
-    event.stopPropagation();
+  handleDeleteSector = (index) => {
     const sectorToDelete = this.state.sectors[index];
     if (window.confirm(`Do you really want to delete the sector "${sectorToDelete.name}"?`)) {
       const sectorRef = ref(db, `bandobastDetails/${sectorToDelete.id}`);
-      remove(sectorRef).then(() => {
-        // Remove the sector from the local state
-        this.setState((prevState) => {
-          const sectors = [...prevState.sectors];
-          sectors.splice(index, 1);
-          const sliderClicked = [...prevState.sliderClicked];
-          sliderClicked.splice(index, 1);
-          const additionalInfo = { ...prevState.additionalInfo };
-          delete additionalInfo[index];
-          return { sectors, sliderClicked, additionalInfo };
+      remove(sectorRef)
+        .then(() => {
+          // Remove the sector from the local state
+          this.setState((prevState) => {
+            const sectors = [...prevState.sectors];
+            sectors.splice(index, 1);
+            const sliderClicked = [...prevState.sliderClicked];
+            sliderClicked.splice(index, 1);
+            const additionalInfo = { ...prevState.additionalInfo };
+            delete additionalInfo[index];
+            const countdowns = { ...prevState.countdowns };
+            delete countdowns[index];
+            return { sectors, sliderClicked, additionalInfo, countdowns };
+          });
+        })
+        .catch((error) => {
+          console.error("Error deleting sector:", error);
         });
-      }).catch((error) => {
-        console.error("Error deleting sector:", error);
-      });
     }
   };
 
@@ -122,7 +204,7 @@ class ActivatedSectors extends React.Component {
               onClick={() => this.handleSectorClick(index)}
             >
               <span>{sector.name}</span>
-              
+              <div className="countdown">{this.state.countdowns[index]}</div>
               <label className="switch rectangular">
                 <input
                   type="checkbox"
@@ -131,19 +213,19 @@ class ActivatedSectors extends React.Component {
                 />
                 <span
                   className="slider rectangular"
-                  onClick={(event) => this.handleSliderClick(event, index)}
+                  onClick={() => this.handleSliderClick(index)}
                 ></span>
               </label>
               <div className="button-container">
                 <button
                   className="info-button"
-                  onClick={(event) => this.toggleAdditionalInfo(event, index)}
+                  onClick={() => this.toggleAdditionalInfo(index)}
                 >
                   {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
                 </button>
                 <button
                   className="delete-button"
-                  onClick={(event) => this.handleDeleteSector(event, index)}
+                  onClick={() => this.handleDeleteSector(index)}
                 >
                   Delete
                 </button>
@@ -155,9 +237,9 @@ class ActivatedSectors extends React.Component {
                     <ul>
                       {Object.values(
                         this.state.additionalInfo[index]?.data.personnel
-                      ).map((person, index) => (
-                        <li key={index}>
-                          {person.name} - {person.position}
+                      ).map((personId, personIndex) => (
+                        <li key={personIndex}>
+                          {this.state.personnelData[personId]?.name}
                         </li>
                       ))}
                     </ul>

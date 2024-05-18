@@ -1,4 +1,4 @@
-/* Sidebar container */
+
 .sidebar {
   height: 100%;
   width: 300px; /* Adjust width as needed */
@@ -185,44 +185,31 @@ input:checked + .slider:before {
 
 
 
-/* Toogle button */
-.slider-container {
-  margin-left: 10px; /* Push the container to the right */
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
 }
 
-
-/* Info, Edit, Delete buttons */
-.info-button,
-.edit-button,
-.delete-button {
-  flex: 1; /* Equal width for buttons */
-  margin-right: 10px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 5px;
-  background-color: #007bff; /* Blue background color */
-  color: #fff; /* White text color */
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease; /* Smooth transition */
+.slider.round:before {
+  border-radius: 50%;
 }
 
-/* Button hover effect */
-.info-button:hover,
-.edit-button:hover,
-.delete-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+.navbar-footer {
+  padding: 10px;
 }
 
-/* Additional info */
-.additional-info {
-  margin-top: 10px;
+/* Additional info button and delete button container */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
-.additional-info h4 {
-  margin-bottom: 10px;
-  font-size: 16px;
-  color: #343a40; /* Dark text color */
+.info-button, .delete-button, .edit-button {
+  width: 30%; /* Slightly less than half to add some space between the buttons */
+  padding: 5px;
+  justify-content: space-between;
+  text-align: center;
 }
 
 .additional-info ul {
