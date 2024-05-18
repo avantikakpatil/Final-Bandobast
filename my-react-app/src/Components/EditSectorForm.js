@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../config/firebaseConfig';
 import { ref, onValue, set } from 'firebase/database';
 
-const EditSectorForm = ({ existingBandobastDetails }) => {
+const EditSectorForm = ({ existingBandobastDetails, onClose }) => {
   const [bandobastDetails, setBandobastDetails] = useState(existingBandobastDetails || {
     title: '',
     personnel: [],
@@ -37,13 +37,10 @@ const EditSectorForm = ({ existingBandobastDetails }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Save updated data to the database
-      const bandobastRef = ref(db, 'bandobastDetails');
-      const updatedBandobastRef = ref(bandobastRef, existingBandobastDetails.id); // Assuming you have an ID for each bandobast
-      set(updatedBandobastRef, bandobastDetails);
+      const bandobastRef = ref(db, `bandobastDetails/${existingBandobastDetails.id}`);
+      await set(bandobastRef, bandobastDetails);
 
-      setShowForm(false);
-      alert('Data saved successfully!');
+      onClose(bandobastDetails);
     } catch (error) {
       console.error('Error saving data: ', error);
       alert('Error saving data: ' + error.message);
@@ -59,8 +56,14 @@ const EditSectorForm = ({ existingBandobastDetails }) => {
   };
 
   const handleCloseForm = () => {
-    setShowForm(false);
+    if (existingBandobastDetails) {
+      setShowForm(false);
+      onClose(bandobastDetails); // Pass the updated sector details to onClose callback
+    } else {
+      setShowForm(false);
+    }
   };
+  
 
   return (
     <div>

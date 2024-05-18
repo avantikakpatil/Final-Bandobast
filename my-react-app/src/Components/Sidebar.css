@@ -1,27 +1,139 @@
-
+/* Sidebar container */
 .sidebar {
-  height: 590px;
+  height: 100%;
+  width: 300px; /* Adjust width as needed */
+  background-color: #f8f9fa; /* Light background color */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+  border-radius: 10px; /* Rounded corners */
   overflow-y: auto; /* Add scrollbar when content overflows */
 }
 
+/* Sidebar header */
 .sidebar-header {
   padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border-bottom: 1px solid #dee2e6; /* Border for separation */
 }
 
 .sidebar-header h2 {
   margin: 0;
   font-size: 24px;
+  color: #343a40; /* Dark text color */
 }
 
-/* Rectangular toggle switch */
+/* Sort dropdowns container */
+.sort-dropdowns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Evenly distribute items */
+  padding: 10px 20px; /* Add padding */
+}
+
+.sort-dropdowns select {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ced4da; /* Light border color */
+  border-radius: 5px;
+  background-color: #fff; /* White background */
+  color: #495057; /* Dark text color */
+  transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+}
+
+.sort-dropdowns select:focus {
+  outline: none;
+  border-color: #80bdff; /* Highlight border color on focus */
+}
+
+.sort-dropdowns select:hover {
+  background-color: #e9ecef; /* Light background color on hover */
+}
+
+/* Sector list */
+.sector-list {
+  padding: 20px;
+}
+
+/* Individual sector */
+.sector {
+  position: relative; /* Set position to relative */
+  margin-bottom: 10px;
+  padding: 15px;
+  border: 1px solid #ced4da; /* Light border color */
+  border-radius: 5px;
+  background-color: #fff; /* White background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+  transition: transform 0.3s ease; /* Smooth transition */
+  width: 250px;
+}
+
+/* Toggle button */
+.toggle-button {
+  position: absolute; /* Set position to absolute */
+  top: 30px; /* Adjust top position as needed */
+  right: 100px; /* Set to right corner */
+}
+
+
+.sector:hover {
+  transform: translateY(-5px); /* Lift up on hover */
+}
+
+/* Active sector */
+.sector.active {
+  border-color: #28a745; /* Green border color for active sectors */
+}
+
+/* Sector name */
+.sector span {
+  font-size: 18px;
+  font-weight: bold;
+  color: #343a40; /* Dark text color */
+}
+
+/* Button container */
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Evenly distribute items */
+}
+
+/* Sector name */
+.sector span {
+  flex: 1; /* Allow sector name to take up remaining space */
+  margin-right: 10px; /* Add spacing between sector name and toggle button */
+}
+
+/* Button group */
+.button-group {
+  display: flex;
+  align-items: center; /* Align buttons vertically */
+}
+
+/* Toggle button */
+.toggle-button {
+  display: flex; /* Use flex to align items */
+  align-items: left;
+  margin-left: 30px; /* Align items vertically */
+}
+
+/* Info, Edit, Delete buttons */
+.info-button,
+.edit-button,
+.delete-button {
+  margin-left: 10px; /* Add spacing between buttons */
+}
+
+/* Additional info */
+.additional-info {
+  margin-top: 10px; /* Increase top margin */
+}
+
+
+/* Rounded switch */
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 50px;
+  height: 24px;
 }
 
 .switch input {
@@ -33,75 +145,92 @@
 .slider {
   position: absolute;
   cursor: pointer;
-  width: 30px;
-  height: 19px;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 14px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 12px;
-  width: 12px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-}
-
-input:checked + .slider {
-  background-color: #2196f3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(12px);
-  -ms-transform: translateX(12px);
-  transform: translateX(12px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
+  height: 26px;
+  width: 26px;
+  left: 0px;
+  right:5px;
+  bottom: 0px;
+  background-color: rgb(230, 230, 230);
+  -webkit-transition: .4s;
+  transition: .4s;
   border-radius: 50%;
 }
 
-.navbar-footer {
-  padding: 10px;
+input:checked + .slider {
+  background-color: #2196F3;
 }
 
-/* Additional info button and delete button container */
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
 }
 
-.info-button, .delete-button, .edit-button {
-  width: 30%; /* Slightly less than half to add some space between the buttons */
-  padding: 5px;
-  justify-content: space-between;
-  text-align: center;
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
 }
 
-.sort-dropdowns {
-  display: flex;
-  align-items: center;
+
+
+/* Toogle button */
+.slider-container {
+  margin-left: 10px; /* Push the container to the right */
 }
 
-.sort-dropdowns select {
-  margin-left: 10px;
+
+/* Info, Edit, Delete buttons */
+.info-button,
+.edit-button,
+.delete-button {
+  flex: 1; /* Equal width for buttons */
+  margin-right: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff; /* Blue background color */
+  color: #fff; /* White text color */
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Button hover effect */
+.info-button:hover,
+.edit-button:hover,
+.delete-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Additional info */
+.additional-info {
+  margin-top: 10px;
+}
+
+.additional-info h4 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #343a40; /* Dark text color */
+}
+
+.additional-info ul {
+  padding-left: 20px;
+}
+
+.additional-info li {
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #6c757d; /* Medium dark text color */
 }

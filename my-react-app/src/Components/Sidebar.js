@@ -14,7 +14,7 @@ class Sidebar extends React.Component {
       sliderClicked: [], // State to track the number of times the slider has been clicked for each sector
       personnelData: {},
       showEditForm: false, // State to control whether to show the edit form
-      editSectorIndex: null, // State to hold the index of the sector being edited
+      editSector: null, // State to hold the sector being edited
       sortBy: 'latest', // State to control sorting option
       sortType: 'date' // State to control sorting type (date or time)
     };
@@ -93,15 +93,15 @@ class Sidebar extends React.Component {
         this.setState((prevState) => ({
           additionalInfo: {
             ...prevState.additionalInfo,
-            [sectorIndex]: {
-              show: prevState.additionalInfo[sectorIndex]?.show || false,
-              data: additionalInfo,
-            },
+          [sectorIndex]: {
+            show: prevState.additionalInfo[sectorIndex]?.show || false,
+            data: additionalInfo,
           },
-        }));
-      }
-    });
-  };
+        },
+      }));
+    }
+  });
+};
 
   toggleAdditionalInfo = (index) => {
     const selectedSector = this.state.sectors[index];
@@ -162,99 +162,75 @@ class Sidebar extends React.Component {
   };
 
   handleEditButtonClick = (index) => {
-    this.setState({ showEditForm: true, editSectorIndex: index });
+    this.setState({ showEditForm: true, editSector: this.state.sectors[index] });
   };
 
-  handleEditFormClose = () => {
-    this.setState({ showEditForm: false, editSectorIndex: null });
+  handleEditFormClose = (updatedSector) => {
+    this.setState((prevState) => {
+      const sectors = prevState.sectors.map((sector) =>
+        sector.id === updatedSector.id ? updatedSector : sector
+      );
+      return { showEditForm: false, editSector: null, sectors };
+    });
   };
 
   render() {
     return (
       <div className="sidebar">
         <div className="sidebar-header">
-  <h2>Sectors</h2>
-  <div className="sort-dropdown">
-    
-    <select value={this.state.sortBy} onChange={this.handleSortChange}>
-      <option value="latest">Latest Date</option>
-      <option value="oldest">Oldest Date</option>
-    </select>
-    <select value={this.state.sortBy} onChange={this.handleSortChange}>
-      <option value="latest">Latest Time</option>
-      <option value="oldest">Oldest Time</option>
-    </select>
-  </div>
-</div>
-
+          <h2>Sectors</h2>
+          <div className="sort-dropdown">
+            <select value={this.state.sortBy} name="sortBy" onChange={this.handleSortChange}>
+              <option value="latest">Latest Date</option>
+              <option value="oldest">Oldest Date</option>
+            </select>
+            <select value={this.state.sortType} name="sortType" onChange={this.handleSortChange}>
+              <option value="latest">Latest Time</option>
+              <option value="oldest">Oldest Time</option>
+            </select>
+          </div>
+        </div>
         <div className="sector-list">
           {this.state.sectors.map((sector, index) => (
-            <div
-              key={index}
-              className={`sector ${sector.active ? "active" : ""}`}
-              onClick={() => this.handleSectorClick(index)}
-            >
+            <div key={index} className={`sector ${sector.active ? "active" : ""}`} onClick={() => this.handleSectorClick(index)}>
               <span>{sector.name}</span>
-              
               <label className="switch rectangular">
-                <input
-                  type="checkbox"
-                  checked={sector.active}
-                  onChange={() => {}}
-                />
-                <span
-                  className="slider rectangular"
-                  onClick={() => this.handleSliderClick(index)}
-                ></span>
+                <input type="checkbox" checked={sector.active} onChange={() => {}} />
+                <span className="slider rectangular" onClick={() => this.handleSliderClick(index)}></span>
               </label>
               <div className="button-container">
-                <button
-                  className="info-button"
-                  onClick={() => this.toggleAdditionalInfo(index)}
-                >
+                <button className="info-button" onClick={() => this.toggleAdditionalInfo(index)}>
                   {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
                 </button>
-                <button
-                  className="edit-button" 
-                  onClick={() => this.handleEditButtonClick(index)} 
-                >
+                <button className="edit-button" onClick={() => this.handleEditButtonClick(index)}>
                   Edit
                 </button>
-                <button
-                  className="delete-button"
-                  onClick={() => this.handleDeleteSector(index)}
-                >
+                <button className="delete-button" onClick={() => this.handleDeleteSector(index)}>
                   Delete
                 </button>
               </div>
-              {this.state.additionalInfo[index]?.show &&
-                this.state.additionalInfo[index]?.data && (
-                  <div className="additional-info">
-                    <h4>Additional Info:</h4>
-                    {/* Display additional info here */}
-                    <ul>
-                      {this.state.additionalInfo[index]?.data.personnel.map(personnelId => (
-                        <li key={personnelId}>
-                          {this.state.personnelData[personnelId]?.name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              {this.state.additionalInfo[index]?.show && this.state.additionalInfo[index]?.data && (
+                <div className="additional-info">
+                  <h4>Additional Info:</h4>
+                  <ul>
+                    {this.state.additionalInfo[index]?.data.personnel.map((personnelId) => (
+                      <li key={personnelId}>{this.state.personnelData[personnelId]?.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {this.state.showEditForm && this.state.editSector === sector && (
+                <EditSectorForm
+                  existingBandobastDetails={sector}
+                  onClose={this.handleEditFormClose}
+                />
+              )}
             </div>
           ))}
         </div>
-        {this.state.showEditForm && (
-        <div className="edit-form-container">
-          <EditSectorForm
-            existingBandobastDetails={this.state.sectors[this.state.editSectorIndex]}
-            onClose={this.handleEditFormClose}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+      </div>
+    );
+  }
 }
 
 export default Sidebar;
