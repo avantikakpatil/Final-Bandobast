@@ -9,16 +9,25 @@ import { ref, onValue } from 'firebase/database';
 const AddPersonnel = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [personnelList, setPersonnelList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const personnelRef = ref(db, 'personnel');
-    onValue(personnelRef, (snapshot) => {
+    const unsubscribe = onValue(personnelRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const personnelData = Object.values(data);
+        const personnelData = Object.entries(data).map(([id, value]) => ({ id, ...value }));
         setPersonnelList(personnelData);
+      } else {
+        setPersonnelList([]);
       }
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching personnel data:', error);
+      setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
   const toggleForm = () => {
@@ -32,40 +41,46 @@ const AddPersonnel = () => {
 
   return (
     <div>
-      <Header />
+      <Header /> {/* Render the Header component */}
       <div className="dashboard">
-        <Navbar />
+        <Navbar /> {/* Render the Navbar component */}
         <div className="content">
-          <table className="personnel-table">
-            <thead>
-              <tr>
-                <th>Sr. No</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Email</th>
-                <th>Device ID</th> {/* New column for Device ID */}
-              </tr>
-            </thead>
-            <tbody>
-              {personnelList.map((personnel, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{personnel.name}</td>
-                  <td>{personnel.position}</td>
-                  <td>{personnel.email}</td>
-                  <td>{personnel.deviceId}</td> {/* Display Device ID */}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button className="add-button" onClick={toggleForm}>Add Officer</button>
-          {isFormOpen && (
-            <div className="popup">
-              <div className="popup-content">
-                <button className="close-button" onClick={() => setIsFormOpen(false)}>×</button>
-                <PersonnelForm onClose={() => setIsFormOpen(false)} addPersonnel={addPersonnel} />
-              </div>
-            </div>
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <>
+              <table className="personnel-table">
+                <thead>
+                  <tr>
+                    <th>Sr. No</th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Email</th>
+                    <th>Device ID</th>        
+                  </tr>
+                </thead>
+                <tbody>
+                  {personnelList.map((personnel, index) => (
+                    <tr key={personnel.id}>
+                      <td>{index + 1}</td>
+                      <td>{personnel.name}</td>
+                      <td>{personnel.position}</td>
+                      <td>{personnel.email}</td>
+                      <td>{personnel.deviceId}</td>                      
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <button className="add-button" onClick={toggleForm}>Add Officer</button> {/* Button to toggle the form */}
+              {isFormOpen && (
+                <div className="popup">
+                  <div className="popup-content">
+                    <button className="close-button" onClick={() => setIsFormOpen(false)}>×</button> {/* Close button */}
+                    <PersonnelForm onClose={() => setIsFormOpen(false)} addPersonnel={addPersonnel} /> {/* Render the form component */}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
