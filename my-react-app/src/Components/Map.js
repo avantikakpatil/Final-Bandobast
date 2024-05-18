@@ -20,28 +20,25 @@ const Map = () => {
     date: '',
     startTime: '',
     endTime: '',
-    coordinates: [] 
+    coordinates: [],
+    circle: null // Add circle data
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
 
-  const addGeoJSONLayer = (geoJSON) => {
-    L.geoJSON(geoJSON, {
-      style: {
-        fillColor: 'blue',
-        fillOpacity: 0.4,
-        color: 'blue',
-        weight: 2,
-      },
-    }).addTo(mapRef.current);
-  };
-
-  
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
     mapRef.current = map;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    // Add geocoder control to the map
+    const geocoder = L.Control.Geocoder.nominatim();
+    L.Control.geocoder({
+      geocoder: geocoder,
+      position: 'topright',
+      placeholder: 'Search for location...'
+    }).addTo(map);
 
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
@@ -72,54 +69,42 @@ const Map = () => {
       
       switch (layerType) {
         case 'rectangle':
-case 'polygon':
-  drawnItems.addLayer(layer);
-  setDrawnLayers([...drawnLayers, layer]);
-  const polygonGeometry = layer.toGeoJSON(); // Rename to polygonGeometry
-  setBandobastDetails({ ...bandobastDetails, geometry: polygonGeometry });
-  setShowForm(true);
-  break;
-case 'polyline':
-case 'circle':
-  drawnItems.addLayer(layer);
-  setDrawnLayers([...drawnLayers, layer]);
-  const circleCenter = layer.getLatLng();
-  const circleRadius = layer.getRadius();
-  const circlePoints = [];
-  const numSegments = 64;
-  for (let i = 0; i < numSegments; i++) {
-    const angle = (Math.PI / 180) * (i * (360 / numSegments));
-    const x = circleCenter.lat + circleRadius * Math.cos(angle);
-    const y = circleCenter.lng + circleRadius * Math.sin(angle);
-    circlePoints.push([x, y]);
-  }
-  const circleGeometry = {
-    type: 'Polygon',
-    coordinates: [circlePoints],
-  };
-  setBandobastDetails({ ...bandobastDetails, geometry: circleGeometry });
-  setShowForm(true);
-  break; 
-}
-});
-    
-  
+        case 'polygon':
+        case 'polyline':
+          drawnItems.addLayer(layer);
+          setDrawnLayers([...drawnLayers, layer]);
+          const polygonGeometry = layer.toGeoJSON(); // Rename to polygonGeometry
+          setBandobastDetails({ ...bandobastDetails, geometry: polygonGeometry });
+          setShowForm(true);
+          break;
+        case 'circle':
+          drawnItems.addLayer(layer);
+          setDrawnLayers([...drawnLayers, layer]);
+          const circleData = {
+            center: layer.getLatLng(),
+            radius: layer.getRadius(),
+          };
+          setBandobastDetails({ ...bandobastDetails, circle: circleData });
+          setShowForm(true);
+          break; 
+      }
+    });
+
     function addPopupToSector(layer, sectorName) {
       layer.bindPopup(sectorName);
     }
-
-    const addGeoJSONLayer = (geoJSON) => {
-    L.geoJSON(geoJSON).addTo(map);
-    };
 
     const bandobastRef = ref(db, 'bandobastDetails');
     onValue(bandobastRef, (snapshot) => {
       const bandobastData = snapshot.val();
       if (bandobastData) {
-        // Extracting and display of sectors from database
         Object.values(bandobastData).forEach(sector => {
-          const { coordinates, title } = sector;
-          if (coordinates && coordinates.length > 0) {
+          const { coordinates, title, circle } = sector;
+          if (circle) {
+            const { center, radius } = circle;
+            const circleLayer = L.circle(center, { radius }).addTo(mapRef.current);
+            addPopupToSector(circleLayer, title);
+          } else if (coordinates && coordinates.length > 0) {
             coordinates.forEach(coord => {
               const sectorLayer = L.geoJSON({
                 type: 'Feature',
@@ -162,11 +147,9 @@ case 'circle':
     });
   }, [drawnLayers]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
 
       // Update bandobastDetails with coordinates
@@ -188,6 +171,7 @@ case 'circle':
         date: '',
         startTime: '',
         endTime: '',
+        circle: null // Reset circle data
       });
     } catch (error) {
       console.error('Error saving data: ', error);
@@ -232,17 +216,14 @@ case 'circle':
               <input type="date" name="date" value={bandobastDetails.date} onChange={(e) => setBandobastDetails({ ...bandobastDetails, date: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
             <div className="form-group">
-              <label>Duration From:</label>
+              <label>Start Time:</label>
               <input type="time" name="startTime" value={bandobastDetails.startTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, startTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
             <div className="form-group">
-              <label>Duration To:</label>
+              <label>End Time:</label>
               <input type="time" name="endTime" value={bandobastDetails.endTime} onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Create Bandobast</button>
-            <div style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1001 }}>
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.5em', color: 'black' }} onClick={handleCloseForm}>×</button>
-            </div>
+            <button type="submit" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none', backgroundColor: '#4CAF50', color: 'white', cursor: 'pointer' }}>Save</button>
           </form>
         </div>
       )}
