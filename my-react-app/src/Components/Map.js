@@ -86,7 +86,14 @@ const Map = () => {
           };
           setBandobastDetails({ ...bandobastDetails, circle: circleData });
           setShowForm(true);
-          break; 
+          break;
+        case 'marker':
+          drawnItems.addLayer(layer);
+          setDrawnLayers([...drawnLayers, layer]);
+          const markerData = layer.toGeoJSON();
+          setBandobastDetails({ ...bandobastDetails, marker: markerData });
+          setShowForm(true);
+          break;
       }
     });
 
@@ -129,6 +136,18 @@ const Map = () => {
           label: personnelData[key].name
         }));
         setPersonnelOptions(options);
+
+        // Add personnel markers to the map
+        Object.values(personnelData).forEach(person => {
+          const marker = L.marker([person.latitude, person.longitude], {
+            icon: new L.Icon({
+              iconUrl: customMarkerIcon,
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+            })
+          }).addTo(mapRef.current);
+          marker.bindPopup(person.name);
+        });
       }
     });
 
@@ -214,6 +233,7 @@ const Map = () => {
   const handleCloseForm = () => {
     setShowForm(false);
   };
+
 
   return (
     <div style={{ position: 'relative' }}>
