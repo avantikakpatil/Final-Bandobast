@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue, push, set } from 'firebase/database';
+import { ref, onValue, push, set, get } from 'firebase/database';
 
 import customMarkerIcon from '../maps-flags_447031.png';
 
@@ -151,18 +151,42 @@ const Map = () => {
     e.preventDefault();
     try {
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
-
+  
       // Update bandobastDetails with coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
         coordinates: coordinates
       };
-
+  
+      // Fetch latitude and longitude from personnel node and update bandobastDetails
+      const personnelIds = bandobastDetails.personnel;
+      const personnelPromises = personnelIds.map(personnelId => {
+        const personnelRef = ref(db, `personnel/${personnelId}`);
+        return get(personnelRef).then(snapshot => snapshot.val());
+      });
+  
+      const personnelDetails = await Promise.all(personnelPromises);
+  
+      // Prepare updated personnel data with latitude and longitude under each deviceId
+      const updatedPersonnelData = {};
+      personnelDetails.forEach(person => {
+        updatedPersonnelData[person.deviceId] = {
+          latitude: person.latitude,
+          longitude: person.longitude
+        };
+      });
+  
+      // Update bandobastDetails with personnel data
+      const updatedBandobastWithPersonnel = {
+        ...updatedBandobastDetails,
+        personnel: updatedPersonnelData
+      };
+  
       // Save updated data to the database
       const bandobastRef = ref(db, 'bandobastDetails');
       const newBandobastRef = push(bandobastRef);
-      set(newBandobastRef, updatedBandobastDetails);
-
+      await set(newBandobastRef, updatedBandobastWithPersonnel);
+  
       setShowForm(false);
       alert('Data saved successfully!');
       setBandobastDetails({
@@ -178,7 +202,7 @@ const Map = () => {
       alert('Error saving data: ' + error.message);
     }
   };
-
+  
   const handleSelectPersonnel = (e) => {
     const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
     setBandobastDetails(prevState => ({
