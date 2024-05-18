@@ -1,4 +1,35 @@
+/* Countdown timer styling */
+.countdown {
+  font-size: 14px;
+  color: #333;
+  margin: 10px 0;
+  padding: 5px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  width: 100px; /* Adjust width as needed */
+}
 
+.sector {
+  padding: 10px;
+  border-bottom: 1px solid #f5f3f3;
+}
+
+/*.sector.active {
+  background-color: #ecf1f1;
+}*/
+
+/* Additional info container styling */
+.additional-info {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #fafafa;
+  border-radius: 4px;
+}
+
+/* Ensure the sidebar content is scrollable if it overflows */
 .sidebar {
   height: 590px;
   overflow-y: auto; /* Add scrollbar when content overflows */
@@ -76,7 +107,7 @@ input:checked + .slider:before {
 }
 
 .slider.round:before {
-  border-radius: 50%;
+  border-radius:
 }
 
 .navbar-footer {
