@@ -1,4 +1,3 @@
-
 .sidebar {
   height: 100%;
   width: 300px; /* Adjust width as needed */
@@ -6,6 +5,7 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
   border-radius: 10px; /* Rounded corners */
   overflow-y: auto; /* Add scrollbar when content overflows */
+  padding-bottom: 20px; /* Add padding at the bottom */
 }
 
 /* Sidebar header */
@@ -18,33 +18,6 @@
   margin: 0;
   font-size: 24px;
   color: #343a40; /* Dark text color */
-}
-
-/* Sort dropdowns container */
-.sort-dropdowns {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Evenly distribute items */
-  padding: 10px 20px; /* Add padding */
-}
-
-.sort-dropdowns select {
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ced4da; /* Light border color */
-  border-radius: 5px;
-  background-color: #fff; /* White background */
-  color: #495057; /* Dark text color */
-  transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transition */
-}
-
-.sort-dropdowns select:focus {
-  outline: none;
-  border-color: #80bdff; /* Highlight border color on focus */
-}
-
-.sort-dropdowns select:hover {
-  background-color: #e9ecef; /* Light background color on hover */
 }
 
 /* Sector list */
@@ -62,7 +35,14 @@
   background-color: #fff; /* White background */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
   transition: transform 0.3s ease; /* Smooth transition */
-  width: 250px;
+  width: 100%; /* Ensure it takes full width */
+}
+
+/* Countdown text */
+.countdown {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #6c757d; /* Medium dark text color */
 }
 
 /* Toggle button */
@@ -71,7 +51,6 @@
   top: 30px; /* Adjust top position as needed */
   right: 100px; /* Set to right corner */
 }
-
 
 .sector:hover {
   transform: translateY(-5px); /* Lift up on hover */
@@ -127,7 +106,6 @@
   margin-top: 10px; /* Increase top margin */
 }
 
-
 /* Rounded switch */
 .switch {
   position: relative;
@@ -161,7 +139,7 @@
   height: 26px;
   width: 26px;
   left: 0px;
-  right:5px;
+  right: 5px;
   bottom: 0px;
   background-color: rgb(230, 230, 230);
   -webkit-transition: .4s;
@@ -182,8 +160,6 @@ input:checked + .slider:before {
   -ms-transform: translateX(26px);
   transform: translateX(26px);
 }
-
-
 
 /* Rounded sliders */
 .slider.round {

@@ -14,7 +14,7 @@ class ActivatedSectors extends React.Component {
       personnelData: {}, // State to hold personnel data
       countdowns: {} // State to hold countdown times for each sector
     };
-    this.timers = {}; // Hold setTimeout references to clear them later
+    this.timers = {}; // Hold setInterval references to clear them later
   }
 
   componentDidMount() {
@@ -28,6 +28,7 @@ class ActivatedSectors extends React.Component {
           name: value.title,
           personnel: value.personnel, // Include personnel information
           active: value.isActive || false, // Include active status, default to false if not available
+          date: value.date,
           startTime: value.startTime,
           endTime: value.endTime
         }));
@@ -71,26 +72,31 @@ class ActivatedSectors extends React.Component {
 
   updateCountdown = (index) => {
     const sector = this.state.sectors[index];
-    const endTime = new Date(sector.endTime).getTime();
+    const [day, month, year] = sector.date.split("-");
+    const startDate = new Date(`${year}-${month}-${day}T${sector.startTime}:00`).getTime();
+    const endDate = new Date(`${year}-${month}-${day}T${sector.endTime}:00`).getTime();
     const now = new Date().getTime();
-    const remainingTime = endTime - now;
 
-    if (remainingTime > 0) {
-      this.setState(prevState => ({
-        countdowns: {
-          ...prevState.countdowns,
-          [index]: this.formatCountdown(remainingTime)
-        }
-      }));
+    let countdownText;
+    let remainingTime;
+
+    if (now < startDate) {
+      remainingTime = startDate - now;
+      countdownText = `Bandobast starts in ${this.formatCountdown(remainingTime)}`;
+    } else if (now < endDate) {
+      remainingTime = endDate - now;
+      countdownText = `Bandobast ends in ${this.formatCountdown(remainingTime)}`;
     } else {
-      this.setState(prevState => ({
-        countdowns: {
-          ...prevState.countdowns,
-          [index]: "00:00:00"
-        }
-      }));
+      countdownText = "Bandobast has ended";
       this.stopCountdown(index);
     }
+
+    this.setState(prevState => ({
+      countdowns: {
+        ...prevState.countdowns,
+        [index]: countdownText
+      }
+    }));
   }
 
   formatCountdown = (milliseconds) => {
