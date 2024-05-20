@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
 import { ref, onValue, push, set, get, update } from 'firebase/database';
-
-import customMarkerIcon from '../maps-flags_447031.png';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -11,8 +9,10 @@ import 'leaflet-draw/dist/leaflet.draw.js';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
 
+const customMarkerIcon = require('../maps-flags_447031.png'); // Ensure the path to your icon is correct
+
 const Map = () => {
-  const mapRef = React.useRef();
+  const mapRef = useRef();
   const [drawnLayers, setDrawnLayers] = useState([]);
   const [bandobastDetails, setBandobastDetails] = useState({
     title: '',
@@ -21,10 +21,11 @@ const Map = () => {
     startTime: '',
     endTime: '',
     coordinates: [],
-    circle: null
+    circle: null,
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
+  const [personnelCoordinates, setPersonnelCoordinates] = useState({});
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -36,11 +37,14 @@ const Map = () => {
     L.Control.geocoder({
       geocoder: geocoder,
       position: 'topright',
-      placeholder: 'Search for location...'
+      placeholder: 'Search for location...',
     }).addTo(map);
 
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
+
+   
+
 
     const drawControl = new L.Control.Draw({
       draw: {
@@ -150,7 +154,7 @@ const Map = () => {
     });
 
     return () => {
-      map.remove();
+      mapRef.current.off();
     };
   }, []);
 
@@ -168,14 +172,15 @@ const Map = () => {
     e.preventDefault();
     try {
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
-  
+    
       const updatedBandobastDetails = {
         ...bandobastDetails,
         coordinates: coordinates
       };
   
-      const personnelIds = bandobastDetails.personnel;
-      const personnelPromises = personnelIds.map(personnelId => {
+      // Filter out only personnel with ID 100
+      const personnelIds100 = bandobastDetails.personnel.filter(personnelId => personnelId === '100');
+      const personnelPromises = personnelIds100.map(personnelId => {
         const personnelRef = ref(db, `personnel/${personnelId}`);
         return get(personnelRef).then(snapshot => snapshot.val());
       });
@@ -215,6 +220,7 @@ const Map = () => {
     }
   };
   
+  
   const handleSelectPersonnel = (e) => {
     const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
     setBandobastDetails(prevState => ({
@@ -227,48 +233,64 @@ const Map = () => {
     setShowForm(false);
   };
 
-  const updatePersonnelLocations = () => {
-    const personnelRef = ref(db, 'personnel');
-    onValue(personnelRef, async (snapshot) => {
-      const personnelData = snapshot.val();
-      const updatedPersonnelData = {};
-      for (const personnelId in personnelData) {
-        const person = personnelData[personnelId];
-        updatedPersonnelData[person.deviceId] = {
-          latitude: person.latitude,
-          longitude: person.longitude
-        };
-      }
-      const bandobastRef = ref(db, 'bandobastDetails');
-      const snapshotBandobast = await get(bandobastRef);
-      if (snapshotBandobast.exists()) {
-        const bandobastData = snapshotBandobast.val();
-        Object.keys(bandobastData).forEach(bandobastId => {
-          const bandobast = bandobastData[bandobastId];
-          const personnelInBandobast = bandobast.personnel;
-          Object.keys(personnelInBandobast).forEach(deviceId => {
-            if (updatedPersonnelData[deviceId]) {
-              personnelInBandobast[deviceId] = updatedPersonnelData[deviceId];
+  useEffect(() => {
+    const updatePersonnelLocations = () => {
+      const deviceDetailsRef = ref(db, 'DeviceDetails/100');
+      onValue(deviceDetailsRef, async (snapshot) => {
+        const { latitude, longitude } = snapshot.val();
+        const personnelRef = ref(db, 'personnel/100');
+        await update(personnelRef, { latitude, longitude });
+
+        const bandobastRef = ref(db, 'bandobastDetails');
+        const snapshotBandobast = await get(bandobastRef);
+        if (snapshotBandobast.exists()) {
+          const bandobastData = snapshotBandobast.val();
+          Object.keys(bandobastData).forEach(bandobastId => {
+            const bandobast = bandobastData[bandobastId];
+            if (bandobast.personnel && bandobast.personnel['100']) {
+              bandobast.personnel['100'] = { latitude, longitude };
+              update(ref(db, `bandobastDetails/${bandobastId}`), { personnel: bandobast.personnel });
             }
           });
-          update(ref(db, `bandobastDetails/${bandobastId}`), { personnel: personnelInBandobast });
-        });
-      }
-    });
-  };
+        }
+      });
+    };
 
-  useEffect(() => {
     updatePersonnelLocations();
   }, []);
 
+  useEffect(() => {
+    bandobastDetails.personnel.forEach(personnelId => {
+      const deviceDetailsRef = ref(db, `DeviceDetails/${personnelId}`);
+      onValue(deviceDetailsRef, async (snapshot) => {
+        const { latitude, longitude } = snapshot.val();
+        const personnelRef = ref(db, `personnel/${personnelId}`);
+        await update(personnelRef, { latitude, longitude });
+
+        const bandobastRef = ref(db, 'bandobastDetails');
+        const snapshotBandobast = await get(bandobastRef);
+        if (snapshotBandobast.exists()) {
+          const bandobastData = snapshotBandobast.val();
+          Object.keys(bandobastData).forEach(bandobastId => {
+            const bandobast = bandobastData[bandobastId];
+            if (bandobast.personnel && bandobast.personnel[personnelId]) {
+              bandobast.personnel[personnelId] = { latitude, longitude };
+              update(ref(db, `bandobastDetails/${bandobastId}`), { personnel: bandobast.personnel });
+            }
+          });
+        }
+      });
+    });
+  }, [bandobastDetails.personnel]);
+
   return (
-    <div style={{ position: 'relative' }}>
-      <div id="map" style={{ height: '600px', position: 'relative' }} />
+    <div>
+      <div id="map" style={{ height: '600px' }}></div>
       {showForm && (
-        <div style={{ position: 'absolute', margin: '10px 30px 20px 40px', width: '37%', height: '600px', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '10px 120px 10px 120px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
-          <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={() => setShowForm(false)}>×</button>
-          <h2 style={{ textAlign: 'center', marginBottom: '20px', marginTop: '2px' }}>Create Bandobast</h2>
-          <form onSubmit={handleSubmit} style={{ marginTop: '1px' }}>
+        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -20%)', backgroundColor: 'white', padding: '20px', border: '1px solid #ccc', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)', zIndex: 1000 }}>
+          <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={handleCloseForm}>×</button>
+          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
+          <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
             <div className="form-group">
               <label>Title of the Bandobast:</label>
               <input type="text" name="title" value={bandobastDetails.title} onChange={(e) => setBandobastDetails({ ...bandobastDetails, title: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />
