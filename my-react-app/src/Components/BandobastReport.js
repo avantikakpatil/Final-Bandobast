@@ -10,7 +10,7 @@ import 'jspdf-autotable';
 const BandobastReport = () => {
   const [bandobastDetails, setBandobastDetails] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDetail, setSelectedDetail] = useState(null);
+  const [viewDetail, setViewDetail] = useState(null);
 
   useEffect(() => {
     const bandobastRef = ref(db, 'bandobastDetails');
@@ -33,19 +33,23 @@ const BandobastReport = () => {
 
   const generatePDF = (detail) => {
     const doc = new jsPDF();
-    doc.text(`Bandobast Report: ${detail.title}`, 10, 10);
-    doc.text(`Number of Personnel Assigned: ${detail.personnel?.length || 0}`, 10, 20);
-    doc.text(`Number of Personnel Moved Out: ${detail.movedOut || 0}`, 10, 30);
-    doc.text(`Additional Information: ${detail.additionalInfo || 'N/A'}`, 10, 40);
+    doc.text('Bandobast Report', 10, 10);
+    doc.text(`Bandobast Name: ${detail.title}`, 10, 20);
+    doc.text(`Number of Personnel Assigned: ${detail.personnel?.length || 0}`, 10, 30);
+    doc.text(`Number of Personnel Moved Out: ${detail.movedOut || 0}`, 10, 40);
+    doc.text(`Additional Information: ${detail.additionalInfo || 'N/A'}`, 10, 50);
+    doc.setFontSize(7);
+    doc.text(`Date of Printing: ${new Date().toLocaleString()}`, 150, 290);
     doc.save(`${detail.title}_BandobastReport.pdf`);
   };
+  
 
-  const handleViewClick = (detail) => {
-    setSelectedDetail(detail);
+  const viewReport = (detail) => {
+    setViewDetail(detail);
   };
 
-  const handleCloseModal = () => {
-    setSelectedDetail(null);
+  const closeReport = () => {
+    setViewDetail(null);
   };
 
   return (
@@ -78,38 +82,30 @@ const BandobastReport = () => {
                       <td>{detail.movedOut || 0}</td>
                       <td>{detail.additionalInfo || 'N/A'}</td>
                       <td>
-                        <button
-                          className="download-button"
-                          onClick={() => generatePDF(detail)}
-                        >
-                          Download PDF
-                        </button>
-                        <button
-                          className="view-button"
-                          onClick={() => handleViewClick(detail)}
-                        >
-                          View
-                        </button>
+                        <button className="download-button" onClick={() => generatePDF(detail)}>Download as PDF</button>
+                        <button className="view-button" onClick={() => viewReport(detail)}>View Report</button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {selectedDetail && (
-                <div className="modal">
-                  <div className="modal-content">
-                    <span className="close-button" onClick={handleCloseModal}>&times;</span>
-                    <h2>Bandobast Report: {selectedDetail.title}</h2>
-                    <p><strong>Number of Personnel Assigned:</strong> {selectedDetail.personnel?.length || 0}</p>
-                    <p><strong>Number of Personnel Moved Out:</strong> {selectedDetail.movedOut || 0}</p>
-                    <p><strong>Additional Information:</strong> {selectedDetail.additionalInfo || 'N/A'}</p>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
       </div>
+      {viewDetail && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close-button" onClick={closeReport}>&times;</span>
+            <h2>Bandobast Report</h2>
+            <p><strong>Bandobast Name:</strong> {viewDetail.title}</p>
+            <p><strong>Number of Personnel Assigned:</strong> {viewDetail.personnel?.length || 0}</p>
+            <p><strong>Number of Personnel Moved Out:</strong> {viewDetail.movedOut || 0}</p>
+            <p><strong>Additional Information:</strong> {viewDetail.additionalInfo || 'N/A'}</p>
+            <p className="print-date"><strong>Date of Printing:</strong> {new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
