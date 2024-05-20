@@ -1,40 +1,33 @@
 #include <LoRa.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <SoftwareSerial.h>
 #include <FirebaseESP8266.h>
 
 #define SS 15
 #define RST 16
-#define DIO0 5
+#define DIO0 2
 
-const char *ssid = "realme 7";
-const char *password = "11223344";
-const char *firebaseHost = "final-band-o-bast.firebaseapp.com";
+const char *firebaseHost = "final-band-o-bast-default-rtdb.firebaseio.com";
 const char *firebaseAuth = "AIzaSyDlodufxD85YZO35-RX0qk3teTsMNV7kVE";
-
-void sendGPSDataToFirebase(String data);
-
 void setup() {
   Serial.begin(9600);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED){
-    delay(1000);
-    Serial.println("Connecting to WiFi...");
-  }
-
-  Serial.println("Connected to Wi-Fi");
   while (!Serial);
   Serial.println("Receiver Host");
 
   Firebase.begin(firebaseHost, firebaseAuth);
 
   LoRa.setPins(SS, RST, DIO0);
+
   if (!LoRa.begin(433E6)) {
     Serial.println("LoRa Error");
     while (1);
   }
+
+  WiFi.begin("realme 7", "11223344"); // Replace with your WiFi SSID and password
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
 }
 
 void loop() {
@@ -45,19 +38,34 @@ void loop() {
 
     while (LoRa.available()) {
       String gpsData = LoRa.readString();
-      // Process and display GPS data as needed
       Serial.println("GPS Data Received via LoRa: " + gpsData);
 
-      // Send GPS data to Firebase
+      // Send data to Firebase
       sendGPSDataToFirebase(gpsData);
     }
-    delay(3000);
   }
 }
 
 void sendGPSDataToFirebase(String data) {
-  FirebaseData fbdo;
-  Firebase.pushString(fbdo, "/gpsData", data);
+  // Extract Latitude and Longitude from the received data
+  int latStart = data.indexOf("Latitude:") + 9;
+  int latEnd = data.indexOf(",Longitude:");
+  String latitudeStr = data.substring(latStart, latEnd);
 
-  Serial.println("Sent GPS data to Firebase: " + data);
+  int lonStart = data.indexOf("Longitude:") + 10;
+  String longitudeStr = data.substring(lonStart);
+
+  // Convert Latitude and Longitude strings to floats
+  float latitude = latitudeStr.toFloat();
+  float longitude = longitudeStr.toFloat();
+
+  // Send data to Firebase
+  FirebaseData fbdo;
+  String deviceId = "100";
+
+  // Update existing values using set method
+  Firebase.setFloat(fbdo, "/DeviceDetails/" + deviceId + "/latitude/", latitude);
+  Firebase.setFloat(fbdo, "/DeviceDetails/" + deviceId + "/longitude/", longitude);
+
+  Serial.println("Sent GPS data to Firebase - Latitude: " + String(latitude, 6) + ", Longitude: " + String(longitude, 6));
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue, push, set, get } from 'firebase/database';
+import { ref, onValue, push, set, get, update } from 'firebase/database';
 
 import customMarkerIcon from '../maps-flags_447031.png';
 
@@ -21,7 +21,7 @@ const Map = () => {
     startTime: '',
     endTime: '',
     coordinates: [],
-    circle: null // Add circle data
+    circle: null
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
@@ -32,7 +32,6 @@ const Map = () => {
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Add geocoder control to the map
     const geocoder = L.Control.Geocoder.nominatim();
     L.Control.geocoder({
       geocoder: geocoder,
@@ -73,7 +72,7 @@ const Map = () => {
         case 'polyline':
           drawnItems.addLayer(layer);
           setDrawnLayers([...drawnLayers, layer]);
-          const polygonGeometry = layer.toGeoJSON(); // Rename to polygonGeometry
+          const polygonGeometry = layer.toGeoJSON();
           setBandobastDetails({ ...bandobastDetails, geometry: polygonGeometry });
           setShowForm(true);
           break;
@@ -137,7 +136,6 @@ const Map = () => {
         }));
         setPersonnelOptions(options);
 
-        // Add personnel markers to the map
         Object.values(personnelData).forEach(person => {
           const marker = L.marker([person.latitude, person.longitude], {
             icon: new L.Icon({
@@ -158,7 +156,7 @@ const Map = () => {
 
   useEffect(() => {
     drawnLayers.forEach(layer => {
-      const name = layer.options.name; // Assuming the name of the sector is stored in the options
+      const name = layer.options.name;
       if (name) {
         const tooltip = L.tooltip({ permanent: true, direction: 'center', className: 'custom-tooltip' }).setContent(name);
         layer.bindTooltip(tooltip).openTooltip();
@@ -171,13 +169,11 @@ const Map = () => {
     try {
       const coordinates = drawnLayers.map(layer => layer.toGeoJSON().geometry.coordinates);
   
-      // Update bandobastDetails with coordinates
       const updatedBandobastDetails = {
         ...bandobastDetails,
         coordinates: coordinates
       };
   
-      // Fetch latitude and longitude from personnel node and update bandobastDetails
       const personnelIds = bandobastDetails.personnel;
       const personnelPromises = personnelIds.map(personnelId => {
         const personnelRef = ref(db, `personnel/${personnelId}`);
@@ -186,7 +182,6 @@ const Map = () => {
   
       const personnelDetails = await Promise.all(personnelPromises);
   
-      // Prepare updated personnel data with latitude and longitude under each deviceId
       const updatedPersonnelData = {};
       personnelDetails.forEach(person => {
         updatedPersonnelData[person.deviceId] = {
@@ -195,13 +190,11 @@ const Map = () => {
         };
       });
   
-      // Update bandobastDetails with personnel data
       const updatedBandobastWithPersonnel = {
         ...updatedBandobastDetails,
         personnel: updatedPersonnelData
       };
   
-      // Save updated data to the database
       const bandobastRef = ref(db, 'bandobastDetails');
       const newBandobastRef = push(bandobastRef);
       await set(newBandobastRef, updatedBandobastWithPersonnel);
@@ -214,7 +207,7 @@ const Map = () => {
         date: '',
         startTime: '',
         endTime: '',
-        circle: null // Reset circle data
+        circle: null
       });
     } catch (error) {
       console.error('Error saving data: ', error);
@@ -234,15 +227,48 @@ const Map = () => {
     setShowForm(false);
   };
 
+  const updatePersonnelLocations = () => {
+    const personnelRef = ref(db, 'personnel');
+    onValue(personnelRef, async (snapshot) => {
+      const personnelData = snapshot.val();
+      const updatedPersonnelData = {};
+      for (const personnelId in personnelData) {
+        const person = personnelData[personnelId];
+        updatedPersonnelData[person.deviceId] = {
+          latitude: person.latitude,
+          longitude: person.longitude
+        };
+      }
+      const bandobastRef = ref(db, 'bandobastDetails');
+      const snapshotBandobast = await get(bandobastRef);
+      if (snapshotBandobast.exists()) {
+        const bandobastData = snapshotBandobast.val();
+        Object.keys(bandobastData).forEach(bandobastId => {
+          const bandobast = bandobastData[bandobastId];
+          const personnelInBandobast = bandobast.personnel;
+          Object.keys(personnelInBandobast).forEach(deviceId => {
+            if (updatedPersonnelData[deviceId]) {
+              personnelInBandobast[deviceId] = updatedPersonnelData[deviceId];
+            }
+          });
+          update(ref(db, `bandobastDetails/${bandobastId}`), { personnel: personnelInBandobast });
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    updatePersonnelLocations();
+  }, []);
 
   return (
     <div style={{ position: 'relative' }}>
       <div id="map" style={{ height: '600px', position: 'relative' }} />
       {showForm && (
-        <div style={{ position: 'absolute', margin: '10px 30px 20px 40px', width: '37%',height:'600px', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '10px 120px 10px 120px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
-        <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={() => setShowForm(false)}>×</button>
-          <h2 style={{ textAlign: 'center', marginBottom: '20px',marginTop:'2px' }}>Create Bandobast</h2>
-          <form onSubmit={handleSubmit} style={{marginTop:'1px'}}>
+        <div style={{ position: 'absolute', margin: '10px 30px 20px 40px', width: '37%', height: '600px', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '10px 120px 10px 120px', borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', zIndex: 1000 }}>
+          <button style={{ position: 'absolute', top: '5px', right: '5px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2em' }} onClick={() => setShowForm(false)}>×</button>
+          <h2 style={{ textAlign: 'center', marginBottom: '20px', marginTop: '2px' }}>Create Bandobast</h2>
+          <form onSubmit={handleSubmit} style={{ marginTop: '1px' }}>
             <div className="form-group">
               <label>Title of the Bandobast:</label>
               <input type="text" name="title" value={bandobastDetails.title} onChange={(e) => setBandobastDetails({ ...bandobastDetails, title: e.target.value })} style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ccc' }} />

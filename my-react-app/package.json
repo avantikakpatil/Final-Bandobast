@@ -8,6 +8,8 @@
     "@testing-library/user-event": "^13.5.0",
     "firebase": "^10.11.0",
     "jquery": "^3.7.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
     "leaflet-draw": "^1.0.4",

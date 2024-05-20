@@ -4,7 +4,7 @@ import Navbar from './Navbar';
 import './BandobastReport.css';
 import { db } from '../config/firebaseConfig';
 import { ref, onValue } from 'firebase/database';
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 const BandobastReport = () => {

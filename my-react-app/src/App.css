@@ -99,7 +99,7 @@ html {
 /* Add your custom styles for the sidebar component here */
 
 .sidebar {
-  width: 250px; /* Adjust width as needed */
+  width: 300px; /* Adjust width as needed */
   height: 100%; /* Occupy full height of its container */
   background-color: #f0f0f0; /* Example background color */
   /* Add any other necessary styles */
@@ -130,7 +130,7 @@ html {
 /* Add any other necessary styles */
 
 .main-content {
-  padding: 5px;
+  padding: 0px;
   flex-grow: 1;
 }
 
