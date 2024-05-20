@@ -18,7 +18,7 @@ const BandobastReport = () => {
       const data = snapshot.val();
       if (data) {
         const details = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-        setBandobastDetails(details);
+        fetchPersonnelNames(details);
       } else {
         setBandobastDetails([]);
       }
@@ -27,22 +27,80 @@ const BandobastReport = () => {
       console.error('Error fetching bandobast details:', error);
       setLoading(false);
     });
-
+  
     return () => unsubscribe();
   }, []);
+  
+  const fetchPersonnelNames = (details) => {
+    const personnelRef = ref(db, 'personnel');
+    onValue(personnelRef, (snapshot) => {
+      const personnelData = snapshot.val();
+      if (personnelData) {
+        const updatedDetails = details.map((detail) => {
+          const personnelIds = Object.keys(detail.personnel || {});
+          const personnelNames = personnelIds.map((personnelId) => personnelData[personnelId]?.name || 'N/A');
+          return { ...detail, personnelNames: personnelNames };
+        });
+        setBandobastDetails(updatedDetails);
+      }
+    });
+  };
 
   const generatePDF = (detail) => {
     const doc = new jsPDF();
-    doc.text('Bandobast Report', 10, 10);
-    doc.text(`Bandobast Name: ${detail.title}`, 10, 20);
-    doc.text(`Number of Personnel Assigned: ${detail.personnel?.length || 0}`, 10, 30);
-    doc.text(`Number of Personnel Moved Out: ${detail.movedOut || 0}`, 10, 40);
-    doc.text(`Additional Information: ${detail.additionalInfo || 'N/A'}`, 10, 50);
+    doc.setFontSize(16);
+    doc.text('Bandobast Report', 105, 10, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(`Bandobast Name: ${detail.title}`, 10, 30);
+
+    // Geotag Location
+    const locationText = `Location of Sector: Latitude ${detail.latitude}, Longitude ${detail.longitude}`;
+    doc.text(locationText, 10, 50);
+
+    // Number of Personnel Assigned
+    doc.text(`Number of Personnel Assigned: ${detail.personnel ? Object.keys(detail.personnel).length : 0}`, 10, 70);
+
+    // List of Personnel names that are assigned
+    let personnelListText = 'List of Personnel Assigned:\n';
+    if (detail.personnel) {
+      Object.values(detail.personnel).forEach((personnel, index) => {
+        personnelListText += `${index + 1}. ${personnel.name || 'N/A'} (${personnel.position || 'N/A'})\n`;
+      });
+    } else {
+      personnelListText += 'N/A';
+    }
+    doc.text(personnelListText, 10, 90);
+
+    // Number of personnel outside and inside show in pie chart
+    const personnelInside = Object.values(detail.personnel || {}).filter(personnel => !personnel.outside).length;
+    const personnelOutside = Object.values(detail.personnel || {}).filter(personnel => personnel.outside).length;
+    doc.addImage(getPieChart(personnelInside, personnelOutside), 'PNG', 120, 110, 80, 80);
+
+    // Date of Printing
     doc.setFontSize(7);
     doc.text(`Date of Printing: ${new Date().toLocaleString()}`, 150, 290);
+
     doc.save(`${detail.title}_BandobastReport.pdf`);
   };
-  
+
+  // Helper function to generate pie chart image (dummy implementation)
+  const getPieChart = (inside, outside) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 100;
+    canvas.height = 100;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'green';
+    ctx.beginPath();
+    ctx.moveTo(50, 50);
+    ctx.arc(50, 50, 50, 0, inside / (inside + outside) * 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.moveTo(50, 50);
+    ctx.arc(50, 50, 50, inside / (inside + outside) * 2 * Math.PI, 2 * Math.PI);
+    ctx.fill();
+    return canvas.toDataURL('image/png');
+  };
 
   const viewReport = (detail) => {
     setViewDetail(detail);
@@ -78,7 +136,7 @@ const BandobastReport = () => {
                     <tr key={detail.id}>
                       <td>{index + 1}</td>
                       <td>{detail.title}</td>
-                      <td>{detail.personnel?.length || 0}</td>
+                      <td>{detail.personnel ? Object.keys(detail.personnel).length : 0}</td>
                       <td>{detail.movedOut || 0}</td>
                       <td>{detail.additionalInfo || 'N/A'}</td>
                       <td>
@@ -99,7 +157,18 @@ const BandobastReport = () => {
             <span className="close-button" onClick={closeReport}>&times;</span>
             <h2>Bandobast Report</h2>
             <p><strong>Bandobast Name:</strong> {viewDetail.title}</p>
-            <p><strong>Number of Personnel Assigned:</strong> {viewDetail.personnel?.length || 0}</p>
+            <p><strong>Location of Sector:</strong> Latitude {viewDetail.latitude}, Longitude {viewDetail.longitude}</p>
+            <p><strong>Number of Personnel Assigned:</strong> {viewDetail.personnel ? Object.keys(viewDetail.personnel).length : 0}</p>
+            <p><strong>List of Personnel Assigned:</strong></p>
+            <ul>
+              {viewDetail.personnel ? (
+                Object.values(viewDetail.personnel).map((personnel, index) => (
+                  <li key={index}>{personnel.name || 'N/A'} ({personnel.position || 'N/A'})</li>
+                ))
+              ) : (
+                <li>N/A</li>
+              )}
+            </ul>
             <p><strong>Number of Personnel Moved Out:</strong> {viewDetail.movedOut || 0}</p>
             <p><strong>Additional Information:</strong> {viewDetail.additionalInfo || 'N/A'}</p>
             <p className="print-date"><strong>Date of Printing:</strong> {new Date().toLocaleString()}</p>
