@@ -9,7 +9,9 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
     email: '',
     latitude: '',
     longitude: '',
-    deviceId: '' // Added deviceId field
+    deviceId: '',
+    isNewDevice: false,
+    newDeviceId: '',
   });
 
   const [deviceOptions, setDeviceOptions] = useState([]);
@@ -34,13 +36,21 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleDeviceChange = async (e) => {
     const deviceId = e.target.value;
-    setFormData({ ...formData, deviceId });
+    setFormData(prevData => ({
+      ...prevData,
+      deviceId,
+      latitude: '',
+      longitude: ''
+    }));
 
     try {
       const deviceDetailsRef = ref(db, `DeviceDetails/${deviceId}`);
@@ -62,12 +72,33 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const { name, position, email, latitude, longitude, deviceId, isNewDevice, newDeviceId } = formData;
+
     try {
-      const personnelRef = ref(db, `personnel/${formData.deviceId}`);
-      await set(personnelRef, formData); // Use set with deviceId as the key
+      const finalDeviceId = isNewDevice ? newDeviceId : deviceId;
+
+      // Update personnel data
+      const personnelRef = ref(db, `personnel/${finalDeviceId}`);
+      await set(personnelRef, {
+        name,
+        position,
+        email,
+        latitude,
+        longitude,
+        deviceId: finalDeviceId
+      });
+
+      // Optionally update device details if it's a new device
+      if (isNewDevice) {
+        const deviceDetailsRef = ref(db, `DeviceDetails/${newDeviceId}`);
+        await set(deviceDetailsRef, {
+          latitude,
+          longitude
+        });
+      }
 
       console.log('Data saved successfully!');
-      addPersonnel(formData); // Optionally update the local state
+      addPersonnel({ ...formData, deviceId: finalDeviceId });
     } catch (error) {
       console.error('Error saving personnel data:', error);
     }
@@ -107,37 +138,61 @@ const PersonnelForm = ({ onClose, addPersonnel }) => {
         />
       </div>
       <div className="form-group">
-        <label>Device ID:</label>
+        <label>Choose existing or enter new Device ID:</label>
         <select
           name="deviceId"
           value={formData.deviceId}
           onChange={handleDeviceChange}
-          required
+          disabled={formData.isNewDevice}
+          required={!formData.isNewDevice}
         >
           <option value="">Select Device</option>
           {deviceOptions.map(option => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
-      </div>
-      <div className="form-group">
-        <label>Latitude:</label>
+        <br />
         <input
-          type="text"
-          name="latitude"
-          value={formData.latitude}
-          readOnly
+          type="checkbox"
+          name="isNewDevice"
+          checked={formData.isNewDevice}
+          onChange={handleChange}
         />
+        <label>Enter new Device ID:</label>
+        {formData.isNewDevice && (
+          <input
+            type="text"
+            name="newDeviceId"
+            value={formData.newDeviceId}
+            onChange={handleChange}
+            required
+          />
+        )}
       </div>
-      <div className="form-group">
-        <label>Longitude:</label>
-        <input
-          type="text"
-          name="longitude"
-          value={formData.longitude}
-          readOnly
-        />
-      </div>
+      {formData.isNewDevice && (
+        <div>
+          <div className="form-group">
+            <label>Latitude:</label>
+            <input
+              type="text"
+              name="latitude"
+              value={formData.latitude}
+              onChange={handleChange}
+              required={formData.isNewDevice}
+            />
+          </div>
+          <div className="form-group">
+            <label>Longitude:</label>
+            <input
+              type="text"
+              name="longitude"
+              value={formData.longitude}
+              onChange={handleChange}
+              required={formData.isNewDevice}
+            />
+          </div>
+        </div>
+      )}
       <button type="submit">Submit</button>
       <br />
       <br />

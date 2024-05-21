@@ -15,24 +15,7 @@ import 'leaflet-control-geocoder/dist/Control.Geocoder.js';
 const MapMonitor = () => {
   const mapRef = useRef();
   const layersRef = useRef([]);
-  const [drawnLayers, setDrawnLayers] = useState([]);
-  const [bandobastDetails, setBandobastDetails] = useState({
-    title: '',
-    personnel: [],
-    date: '',
-    startTime: '',
-    endTime: '',
-    coordinates: [],
-    circle: null,
-  });
-  const [showForm, setShowForm] = useState(false);
-  const [personnelOptions, setPersonnelOptions] = useState([]);
   const [activeSectors, setActiveSectors] = useState([]);
-
-  // Function to add popup to a sector (layer)
-  function addPopupToSector(layer, sectorName) {
-    layer.bindPopup(sectorName);
-  }
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -48,66 +31,13 @@ const MapMonitor = () => {
       placeholder: 'Search for location...',
     }).addTo(map);
 
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
-
-    const drawControl =
-new L.Control.Draw({
-      draw: {
-        rectangle: true,
-        polygon: true,
-        polyline: true,
-        circle: true,
-        marker: {
-          icon: new L.Icon({
-            iconUrl: customMarkerIcon,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-          }),
-        },
-      },
-      edit: {
-        featureGroup: drawnItems,
-        remove: true,
-      },
-    });
-    map.addControl(drawControl);
-
-    map.on('draw:created', function (event) {
-      const { layer, layerType } = event;
-
-      switch (layerType) {
-        case 'rectangle':
-        case 'polygon':
-        case 'polyline':
-          drawnItems.addLayer(layer);
-          setDrawnLayers((prevLayers) => [...prevLayers, layer]);
-          const polygonGeometry = layer.toGeoJSON();
-          setBandobastDetails((prevDetails) => ({ ...prevDetails, geometry: polygonGeometry }));
-          setShowForm(true);
-          break;
-        case 'circle':
-          drawnItems.addLayer(layer);
-          setDrawnLayers((prevLayers) => [...prevLayers, layer]);
-          const circleData = {
-            center: layer.getLatLng(),
-            radius: layer.getRadius(),
-          };
-          setBandobastDetails((prevDetails) => ({ ...prevDetails, circle: circleData }));
-          setShowForm(true);
-          break;
-        default:
-          break;
-      }
-    });
-
     // Retrieve active bandobast details from Firebase
     const bandobastRef = ref(db, 'bandobastDetails');
     onValue(bandobastRef, (snapshot) => {
       const bandobastData = snapshot.val();
       if (bandobastData) {
-        const filteredData = Object.values(bandobastData).filter(sector => sector.isActive);
-        setActiveSectors(filteredData);
+        const activeSectorsData = Object.values(bandobastData).filter(sector => sector.isActive);
+        setActiveSectors(activeSectorsData);
       }
     });
 
@@ -129,27 +59,27 @@ new L.Control.Draw({
     });
     layersRef.current = [];
 
-    // Add new layers
+    // Add new layers for active sectors
     activeSectors.forEach((sector) => {
-      const { title, geometry, personnel } = sector;
+      const { title, geometry, circle, personnel } = sector;
       let layer;
 
-      if (sector.circle) {
+      if (circle) {
         // Handle circles
-        layer = L.circle(sector.circle.center, { radius: sector.circle.radius }).addTo(mapRef.current);
+        layer = L.circle(circle.center, { radius: circle.radius }).addTo(mapRef.current);
       } else if (geometry && geometry.type === "Feature" && geometry.geometry.type === "Polygon") {
         // Handle polygons
         layer = L.geoJSON(geometry).addTo(mapRef.current);
       }
 
       if (layer) {
-        addPopupToSector(layer, title);
+        layer.bindPopup(title);
         layersRef.current.push(layer);
       }
 
-      // Add personnel markers
-      if (personnel && personnel.length > 0) {
-        personnel.forEach(person => {
+      // Add personnel markers for active sectors
+      if (personnel) {
+        Object.values(personnel).forEach(person => {
           const { latitude, longitude } = person;
           const personnelMarker = L.marker([latitude, longitude], {
             icon: new L.Icon({

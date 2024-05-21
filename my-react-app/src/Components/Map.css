@@ -31,7 +31,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-  z-index: 1000; /* Higher z-index for the modal overlay */
+ 
 }
 
 .ReactModal__Content {
@@ -43,7 +43,7 @@
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 1001; /* Higher z-index for the modal content */
+  
 }
 
 /* Ensure that map doesn't block interaction with the modal */
