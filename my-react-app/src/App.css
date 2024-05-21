@@ -20,6 +20,7 @@ html {
 .content {
   display: flex;
   flex: 1; /* Fill remaining space */
+  
 }
 
 /* Add your custom styles for the navbar component here */
@@ -37,8 +38,8 @@ html {
 
 .navbar-menu {
   list-style-type: none;
-  margin: 0;
-  padding: 0;
+  margin: 0px;
+  padding: 0px;
 }
 
 .navbar-menu li {
@@ -80,7 +81,6 @@ html {
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
   padding: 5px 10px;
-  border-radius: 5px;
   font-size: 14px;
 }
 
@@ -100,7 +100,7 @@ html {
 
 .sidebar {
   width: 300px; /* Adjust width as needed */
-  height: 100%; /* Occupy full height of its container */
+  height: 500px; /* Occupy full height of its container */
   background-color: #f0f0f0; /* Example background color */
   /* Add any other necessary styles */
 }
@@ -130,7 +130,7 @@ html {
 /* Add any other necessary styles */
 
 .main-content {
-  padding: 0px;
+  padding: 5px;
   flex-grow: 1;
 }
 
@@ -192,7 +192,6 @@ html {
   font-weight: bold; /* Bold font for the user's name */
   /* Additional styles for the user's name */
 }
-/* App.css */
 
 .notification-icon {
   width: 30px; /* Adjust width as needed */
@@ -200,10 +199,7 @@ html {
   margin-right: 10px; /* Spacing between notification icon and profile icon */
 }
 
-/* Map.css or App.css */
-
 .main-content {
   border: 2px solid #ccc; /* Example border style */
-  border-radius: 5px; /* Optional: Add border radius for rounded corners */
-  padding: 10px; /* Optional: Add padding for spacing */
+  border-radius: 0px; /* Optional: Add border radius for rounded corners */
 }

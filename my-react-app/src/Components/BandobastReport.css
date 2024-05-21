@@ -25,7 +25,7 @@
 .download-button, .view-button {
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #2196F3;
   color: white;
   border: none;
   cursor: pointer;
@@ -33,7 +33,7 @@
 }
 
 .download-button:hover, .view-button:hover {
-  background-color: #45a049;
+  background-color: #0763ae;
 }
 
 .modal {
