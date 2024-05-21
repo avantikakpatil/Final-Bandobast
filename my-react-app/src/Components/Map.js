@@ -149,6 +149,14 @@ const Map = () => {
             })
           }).addTo(mapRef.current);
           marker.bindPopup(person.name);
+        
+          // Adding circle with radius 20m around personnel marker
+          const circle = L.circle([person.latitude, person.longitude], {
+            radius: 10,
+            color: 'red',  // Customize the circle color
+            fillColor: '#f03', // Customize the fill color
+            fillOpacity: 0.5  // Adjust the fill opacity
+          }).addTo(mapRef.current);
         });
       }
     });
