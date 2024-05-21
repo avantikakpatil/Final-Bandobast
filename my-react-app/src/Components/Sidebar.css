@@ -1,18 +1,16 @@
 .sidebar {
-  height: 100%;
-  width: 300px; /* Adjust width as needed */
+  height: 590px;
+  width: 250px; 
   background-color: #f8f9fa; /* Light background color */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
   border-radius: 10px; /* Rounded corners */
   overflow-y: auto; /* Add scrollbar when content overflows */
-  padding-bottom: 20px; /* Add padding at the bottom */
-  padding: 0px;
-  margin: 0px;
+  padding-bottom: 0px; /* Add padding at the bottom */
 }
 
 /* Sidebar header */
 .sidebar-header {
-  padding: 5px;
+  padding: 10px;
   border-bottom: 1px solid #dee2e6; /* Border for separation */
 }
 
@@ -31,20 +29,14 @@
 .sector {
   position: relative; /* Set position to relative */
   margin-bottom: 10px;
-  padding: 15px;
+  padding: 12px;
   border: 1px solid #ced4da; /* Light border color */
-  border-radius: 5px;
+  width: 215px;
   background-color: #fff; /* White background */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
   transition: transform 0.3s ease; /* Smooth transition */
-  width: calc(100% - 30px); /* Ensure it takes full width */
   margin-left: -15px; /* Adjust for padding in the sector-list */
   margin-right: -15px; /* Adjust for padding in the sector-list */
-}
-
-/* Remove hover effect */
-.sector:hover {
-  transform: none; /* No transform effect on hover */
 }
 
 /* Countdown text */
@@ -58,11 +50,12 @@
 .toggle-button {
   position: absolute; /* Set position to absolute */
   top: 30px; /* Adjust top position as needed */
-  right: 100px; /* Set to right corner */
+  left: 40px; 
 }
 
 .sector.active {
-  border-color: #28a745; /* Green border color for active sectors */
+  border: 1px solid #040510;
+  width: 215px;
 }
 
 /* Sector name */
@@ -111,8 +104,9 @@
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 24px;
+  width: 40px;
+  height: 18px;
+  margin-bottom: 10px;
 }
 
 .switch input {
@@ -131,21 +125,18 @@
   background-color: #ccc;
   -webkit-transition: .4s;
   transition: .4s;
-  border-radius: 14px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 0px;
-  right: 5px;
-  bottom: 0px;
-  background-color: rgb(230, 230, 230);
+  height: 13px;
+  width: 12px;
+  left: 2px;
+  bottom: 3px;
+  background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
-  border-radius: 50%;
 }
 
 input:checked + .slider {
@@ -157,9 +148,9 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(15px);
+  -ms-transform: translateX(15px);
+  transform: translateX(15px);
 }
 
 /* Rounded sliders */
