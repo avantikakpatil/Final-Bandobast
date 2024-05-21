@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
-import { ref, onValue, push, set, get, update } from 'firebase/database';
+import { ref, onValue, push, set, get } from 'firebase/database';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw/dist/leaflet.draw.js';
@@ -24,6 +24,8 @@ const Map = () => {
   });
   const [showForm, setShowForm] = useState(false);
   const [personnelOptions, setPersonnelOptions] = useState([]);
+  const [selectedBandobast, setSelectedBandobast] = useState(null);
+  const personnelMarkersRef = useRef({});
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -96,8 +98,9 @@ const Map = () => {
     onValue(bandobastRef, (snapshot) => {
       const bandobastData = snapshot.val();
       if (bandobastData) {
-        Object.values(bandobastData).forEach(sector => {
-          const { coordinates, title, circle } = sector;
+        Object.keys(bandobastData).forEach(bandobastId => {
+          const sector = bandobastData[bandobastId];
+          const { coordinates, title, circle, personnel } = sector;
           if (circle) {
             const { center, radius } = circle;
             const circleLayer = L.circle(center, { radius }).addTo(map);
@@ -114,6 +117,9 @@ const Map = () => {
               sectorLayer.bindPopup(title);
             });
           }
+          if (personnel) {
+            setSelectedBandobast(bandobastId);
+          }
         });
       }
     });
@@ -127,24 +133,6 @@ const Map = () => {
           label: personnelData[key].name,
         }));
         setPersonnelOptions(options);
-
-        Object.values(personnelData).forEach(person => {
-          const marker = L.marker([person.latitude, person.longitude], {
-            icon: new L.Icon({
-              iconUrl: customMarkerIcon,
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-            }),
-          }).addTo(map);
-          marker.bindPopup(person.name);
-
-          const circle = L.circle([person.latitude, person.longitude], {
-            radius: 10,
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-          }).addTo(map);
-        });
       }
     });
 
@@ -153,6 +141,54 @@ const Map = () => {
       map.remove();
     };
   }, []);
+
+  useEffect(() => {
+    const personnelRef = ref(db, 'personnel');
+    onValue(personnelRef, (snapshot) => {
+      const personnelData = snapshot.val();
+      if (personnelData) {
+        updatePersonnelMarkers(personnelData);
+      }
+    });
+  }, [selectedBandobast]);
+
+  const updatePersonnelMarkers = (personnelData) => {
+    const bandobastRef = ref(db, 'bandobastDetails');
+    get(bandobastRef).then(snapshot => {
+      const bandobastData = snapshot.val();
+
+      if (bandobastData) {
+        Object.keys(bandobastData).forEach(bandobastId => {
+          const { personnel: selectedPersonnel } = bandobastData[bandobastId];
+
+          Object.keys(selectedPersonnel).forEach(personnelId => {
+            const person = personnelData[personnelId];
+            if (person && !personnelMarkersRef.current[personnelId]) {
+              const marker = L.marker([person.latitude, person.longitude], {
+                icon: new L.Icon({
+                  iconUrl: customMarkerIcon,
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 32],
+                }),
+              }).addTo(mapRef.current);
+              marker.bindPopup(person.name);
+          
+              // Add circle around personnel marker with a 10-meter radius
+              const circle = L.circle([person.latitude, person.longitude], {
+                radius: 10,
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+              }).addTo(mapRef.current);
+          
+              personnelMarkersRef.current[personnelId] = { marker, circle };
+            }
+          });
+          
+        });
+      }
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -218,34 +254,6 @@ const Map = () => {
     setShowForm(false);
   };
 
-  useEffect(() => {
-    const updatePersonnelLocations = (personnelId) => {
-      const deviceDetailsRef = ref(db, `DeviceDetails/${personnelId}`);
-      onValue(deviceDetailsRef, async (snapshot) => {
-        const { latitude, longitude } = snapshot.val();
-        const personnelRef = ref(db, `personnel/${personnelId}`);
-        await update(personnelRef, { latitude, longitude });
-
-        const bandobastRef = ref(db, 'bandobastDetails');
-        const snapshotBandobast = await get(bandobastRef);
-        if (snapshotBandobast.exists()) {
-          const bandobastData = snapshotBandobast.val();
-          Object.keys(bandobastData).forEach(bandobastId => {
-            const bandobast = bandobastData[bandobastId];
-            if (bandobast.personnel && bandobast.personnel[personnelId]) {
-              bandobast.personnel[personnelId] = { latitude, longitude };
-              update(ref(db, `bandobastDetails/${bandobastId}`), { personnel: bandobast.personnel });
-            }
-          });
-        }
-      });
-    };
-
-    bandobastDetails.personnel.forEach(personnelId => {
-      updatePersonnelLocations(personnelId);
-    });
-  }, [bandobastDetails.personnel]);
-
   return (
     <div>
       <div id="map" style={{ height: '600px' }}></div>
@@ -261,6 +269,8 @@ const Map = () => {
           }} onClick={handleCloseForm}>×</button>
           <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
           <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+           
+
             <div className="form-group">
               <label>Title of the Bandobast:</label>
               <input type="text" name="title" value={bandobastDetails.title}
