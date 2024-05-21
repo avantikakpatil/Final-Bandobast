@@ -1,18 +1,9 @@
-import React, { useState } from 'react';
+// In the Notification component
+
+import React from 'react';
 import './Notification.css';
 
-const Notification = () => {
-  // Dummy data for notifications
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: '5 personnels are out of area.' },
-    { id: 2, message: 'Bandobast ended' },
-    { id: 3, message: 'Alert' }
-  ]);
-
-  const handleCloseNotification = (id) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
-  };
-
+const Notification = ({ notifications = [] }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -22,21 +13,17 @@ const Notification = () => {
         {notifications.map(notification => (
           <li
             key={notification.id}
-            className={`notification-item ${
-              notification.message === "Alert"
-                ? "alert"
-                : notification.message === "5 personnels are out of area."
-                ? "out-of-area"
-                : "bandobast-ended"
-            }`}
+            className={`notification-item ${notification.message.includes("is out of the sector area") ? "out-of-area" : ""}`}
           >
             <div className="notification-message">{notification.message}</div>
-            <div className="notification-close" onClick={() => handleCloseNotification(notification.id)}>✖</div>
+            <div className="notification-close">✖</div>
           </li>
         ))}
       </ul>
     </div>
   );
 };
+
+
 
 export default Notification;
