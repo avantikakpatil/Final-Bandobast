@@ -4,6 +4,7 @@ import { db } from '../config/firebaseConfig';
 import { ref, onValue } from 'firebase/database';
 
 import customMarkerIcon from '../maps-flags_447031.png';
+import personnelIcon from '../images/pin_1217301.png'; // Path to personnel icon
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -50,7 +51,8 @@ const MapMonitor = () => {
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
 
-    const drawControl = new L.Control.Draw({
+    const drawControl =
+new L.Control.Draw({
       draw: {
         rectangle: true,
         polygon: true,
@@ -129,7 +131,7 @@ const MapMonitor = () => {
 
     // Add new layers
     activeSectors.forEach((sector) => {
-      const { center, radius, title, geometry } = sector;
+      const { title, geometry, personnel } = sector;
       let layer;
 
       if (sector.circle) {
@@ -143,6 +145,23 @@ const MapMonitor = () => {
       if (layer) {
         addPopupToSector(layer, title);
         layersRef.current.push(layer);
+      }
+
+      // Add personnel markers
+      if (personnel && personnel.length > 0) {
+        personnel.forEach(person => {
+          const { latitude, longitude } = person;
+          const personnelMarker = L.marker([latitude, longitude], {
+            icon: new L.Icon({
+              iconUrl: personnelIcon,
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+            }),
+          }).addTo(mapRef.current);
+
+          personnelMarker.bindPopup(person.title);
+          layersRef.current.push(personnelMarker);
+        });
       }
     });
   }, [activeSectors]);

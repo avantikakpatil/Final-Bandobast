@@ -6,11 +6,13 @@
   border-radius: 10px; /* Rounded corners */
   overflow-y: auto; /* Add scrollbar when content overflows */
   padding-bottom: 20px; /* Add padding at the bottom */
+  padding: 0px;
+  margin: 0px;
 }
 
 /* Sidebar header */
 .sidebar-header {
-  padding: 20px;
+  padding: 5px;
   border-bottom: 1px solid #dee2e6; /* Border for separation */
 }
 
