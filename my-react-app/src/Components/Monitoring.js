@@ -10,7 +10,7 @@ class Dashboard extends React.Component {
         <Header /> {/* Include Header component */}
         <div className="dashboard">
           <Navbar />
-          <div className="content">
+          <div className="content" style={{padding : 0}}>
           <ContentMonitor />
             <ActivatedSectors />
           </div>

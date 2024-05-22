@@ -24,7 +24,7 @@ class HomePage extends React.Component {
         <Header /> {/* Include Header component */}
         <div className="dashboard">
           <Navbar />
-          <div className="content">
+          <div className="content" style={{padding : 0}}>
             <MainContent />
             <Notification notifications={this.state.notifications} />
           </div>
