@@ -22,27 +22,14 @@ const HomePage = () => {
     });
   }, []);
 
-<<<<<<< HEAD
-  render() {
-    return (
-      <div>
-        <Header /> {/* Include Header component */}
-        <div className="dashboard">
-          <Navbar />
-          <div className="content" style={{padding : 0}}>
-            <MainContent />
-            <Notification notifications={this.state.notifications} />
-          </div>
-=======
   return (
     <div>
       <Header /> {/* Include Header component */}
       <div className="dashboard">
         <Navbar />
-        <div className="content">
+        <div className="content" style={{padding : 0}}>
           <MainContent />
           <Notification notifications={notifications} />
->>>>>>> 80d0c704eb0508a83c0ea7bdb148fcdd31823d89
         </div>
       </div>
     </div>
