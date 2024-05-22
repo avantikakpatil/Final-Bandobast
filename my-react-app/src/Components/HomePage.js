@@ -5,6 +5,19 @@ import Header from './Header';
 import Notification from './Notification';
 
 class HomePage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      notifications: []
+    };
+  }
+
+  addNotification = (message) => {
+    this.setState(prevState => ({
+      notifications: [...prevState.notifications, { id: Date.now(), message }]
+    }));
+  };
+
   render() {
     return (
       <div>
@@ -13,7 +26,7 @@ class HomePage extends React.Component {
           <Navbar />
           <div className="content">
             <MainContent />
-            <Notification />
+            <Notification notifications={this.state.notifications} />
           </div>
         </div>
       </div>
