@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { db } from '../config/firebaseConfig';
 import { ref, onValue, push, set } from 'firebase/database';
-import Notification from './Notification';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -110,7 +109,7 @@ const MapMonitor = () => {
 
       if (personnel) {
         Object.entries(personnel).forEach(([personId, person]) => {
-          const { latitude, longitude, deviceId } = person;
+          const { latitude, longitude } = person;
           
           // Fetch personnel details from Firebase based on personId
           const personnelRef = ref(db, `personnel/${personId}`);
@@ -172,13 +171,10 @@ const MapMonitor = () => {
     });
   }, [activeSectors, existingNotifications]);
 
-  const handleCloseNotification = (id) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
-  };
-
   return (
     <div>
       <div id="map" style={{ height: '600px' }} />
+      {/* Assuming you have a Notification component that you want to use */}
     </div>
   );
 };
