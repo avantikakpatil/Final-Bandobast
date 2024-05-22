@@ -1,10 +1,6 @@
-// ActivatedSectors.js
 import React from "react";
 import { ref, onValue, set, remove } from "firebase/database";
 import { db } from "../config/firebaseConfig";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import customMarkerIcon from "../maps-flags_447031.png";
 import "./Sidebar.css";
 
 class ActivatedSectors extends React.Component {
@@ -16,11 +12,9 @@ class ActivatedSectors extends React.Component {
       additionalInfo: {},
       sliderClicked: [],
       personnelData: {},
-      countdowns: {},
+      countdowns: {}
     };
     this.timers = {};
-    this.personnelMarkersRef = React.createRef();
-    this.personnelMarkersRef.current = {};
   }
 
   componentDidMount() {
@@ -35,22 +29,20 @@ class ActivatedSectors extends React.Component {
           active: value.isActive || false,
           date: value.date,
           startTime: value.startTime,
-          endTime: value.endTime,
-          fixedPosition: value.fixedPosition,
-          radius: value.radius,
+          endTime: value.endTime
         }));
-        this.setState(
-          { sectors: sectorNames, sliderClicked: Array(sectorNames.length).fill(0) },
-          this.initializeCountdowns
-        );
+        this.setState({ 
+          sectors: sectorNames, 
+          sliderClicked: Array(sectorNames.length).fill(0) 
+        }, this.initializeCountdowns);
       }
     });
-
-    const personnelRef = ref(db, "personnel");
+  
+    const personnelRef = ref(db, 'personnel');
     onValue(personnelRef, (snapshot) => {
       const personnelData = snapshot.val();
       if (personnelData) {
-        this.setState({ personnelData }, this.updatePersonnelMarkers);
+        this.setState({ personnelData });
       }
     });
   }
@@ -61,7 +53,7 @@ class ActivatedSectors extends React.Component {
         this.startCountdown(index);
       }
     });
-  };
+  }
 
   startCountdown = (index) => {
     const update = () => {
@@ -69,12 +61,12 @@ class ActivatedSectors extends React.Component {
     };
     this.updateCountdown(index);
     this.timers[index] = setInterval(update, 1000);
-  };
+  }
 
   stopCountdown = (index) => {
     clearInterval(this.timers[index]);
     this.timers[index] = null;
-  };
+  }
 
   updateCountdown = (index) => {
     const sector = this.state.sectors[index];
@@ -97,21 +89,21 @@ class ActivatedSectors extends React.Component {
       this.stopCountdown(index);
     }
 
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       countdowns: {
         ...prevState.countdowns,
-        [index]: countdownText,
-      },
+        [index]: countdownText
+      }
     }));
-  };
+  }
 
   formatCountdown = (milliseconds) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
     return `${hours}:${minutes}:${seconds}`;
-  };
+  }
 
   handleSectorClick = (sectorIndex) => {
     const selectedSector = this.state.sectors[sectorIndex];
@@ -150,11 +142,9 @@ class ActivatedSectors extends React.Component {
     const sectorToUpdate = this.state.sectors[index];
     const newActiveStatus = !sectorToUpdate.active;
 
-    if (window.confirm(`Do you really want to ${newActiveStatus ? "activate" : "deactivate"} this sector?`)) {
-      this.setState((prevState) => ({
-        sectors: prevState.sectors.map((sector, i) =>
-          i === index ? { ...sector, active: newActiveStatus } : sector
-        ),
+    if (window.confirm(`Do you really want to ${newActiveStatus ? 'activate' : 'deactivate'} this sector?`)) {
+      this.setState(prevState => ({
+        sectors: prevState.sectors.map((sector, i) => i === index ? {...sector, active: newActiveStatus} : sector)
       }));
 
       set(ref(db, `bandobastDetails/${sectorToUpdate.id}/isActive`), newActiveStatus);
@@ -163,11 +153,11 @@ class ActivatedSectors extends React.Component {
         this.startCountdown(index);
       } else {
         this.stopCountdown(index);
-        this.setState((prevState) => ({
+        this.setState(prevState => ({
           countdowns: {
             ...prevState.countdowns,
-            [index]: null,
-          },
+            [index]: null
+          }
         }));
       }
     }
@@ -197,116 +187,97 @@ class ActivatedSectors extends React.Component {
     }
   };
 
-  calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c * 1000; // Distance in meters
-  };
+  checkPersonnelPositions = () => {
+    const { sectors, personnelData } = this.state;
+    sectors.forEach(sector => {
+      if (sector.active && sector.personnel) {
+        const [day, month, year] = sector.date.split("-");
+        const endDate = new Date(`${year}-${month}-${day}T${sector.endTime}:00`).getTime();
+        const now = new Date().getTime();
 
-  updatePersonnelMarkers = () => {
-    const { personnelData, selectedSector } = this.state;
-    if (!selectedSector) return;
-
-    const { fixedPosition, radius } = selectedSector;
-
-    Object.keys(personnelData).forEach((personnelId) => {
-      const person = personnelData[personnelId];
-      if (person && !this.personnelMarkersRef.current[personnelId]) {
-        const marker = L.marker([person.latitude, person.longitude], {
-          icon: new L.Icon({
-            iconUrl: customMarkerIcon,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-          }),
-        }).addTo(this.props.mapRef);
-        marker.bindPopup(person.name);
-
-        const circle = L.circle([person.latitude, person.longitude], {
-          radius: 10,
-          color: "red",
-          fillColor: "#f03",
-          fillOpacity: 0.5,
-        }).addTo(this.props.mapRef);
-
-        this.personnelMarkersRef.current[personnelId] = { marker, circle };
-      }
-
-      if (fixedPosition && radius) {
-        const distance = this.calculateDistance(
-          fixedPosition.latitude,
-          fixedPosition.longitude,
-          person.latitude,
-          person.longitude
-        );
-        if (distance > radius) {
-          const message = `${person.name} is outside the designated area!`;
-          console.warn(message);
-          this.props.addNotification(message);
+        if (now < endDate) {
+          Object.keys(sector.personnel).forEach(personnelId => {
+            const person = personnelData[personnelId];
+            if (person) {
+              const distance = this.calculateDistance(sector, person);
+              if (distance > 10) {
+                this.props.addNotification(`${person.name} is out of the sector area`);
+              }
+            }
+          });
         }
       }
     });
-  };
+  }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.selectedSector !== this.state.selectedSector ||
-      prevState.personnelData !== this.state.personnelData
-    ) {
-      this.updatePersonnelMarkers();
-    }
+  calculateDistance = (sector, person) => {
+    const [sectorLat, sectorLng] = [sector.latitude, sector.longitude];
+    const R = 6371e3;
+    const φ1 = sectorLat * Math.PI/180;
+    const φ2 = person.latitude * Math.PI/180;
+    const Δφ = (person.latitude - sectorLat) * Math.PI/180;
+    const Δλ = (person.longitude - sectorLng) * Math.PI/180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
   }
 
   render() {
-    const activeSectors = this.state.sectors.filter((sector) => sector.active);
-
     return (
       <div className="sidebar">
-        <div className="sidebar-header">
-          <h2>Sectors</h2>
-        </div>
-        <div className="sector-list">
-          {activeSectors.map((sector, index) => (
-            <div
-              key={index}
-              className={`sector ${sector.active ? "active" : ""}`}
-              onClick={() => this.handleSectorClick(index)}
-            >
-              <span>{sector.name}</span>
-              <div className="countdown">{this.state.countdowns[index]}</div>
-              <label className="switch rectangular">
-                <input type="checkbox" checked={sector.active} onChange={() => {}} />
-                <span className="slider rectangular" onClick={() => this.handleSliderClick(index)}></span>
-              </label>
-              <div className="button-container">
-                <button className="info-button" onClick={() => this.toggleAdditionalInfo(index)}>
-                  {this.state.additionalInfo[index]?.show ? "Hide" : "Info"}
-                </button>
-                <button className="delete-button" onClick={() => this.handleDeleteSector(index)}>
-                  Delete
-                </button>
-              </div>
-              {this.state.additionalInfo[index]?.show &&
-                this.state.additionalInfo[index]?.data && (
+        <h2>Activated Sectors</h2>
+        {this.state.sectors.length === 0 ? (
+          <p>No activated sectors available</p>
+        ) : (
+          <ul className="sector-list">
+            {this.state.sectors.map((sector, index) => (
+              <li key={index} className="sector-item">
+                <div className="sector-header">
+                  <div
+                    className={`sector-name ${this.state.sliderClicked[index] ? "clicked" : ""}`}
+                    onClick={() => this.handleSectorClick(index)}
+                  >
+                    {sector.name}
+                  </div>
+                  <div className="sector-actions">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={sector.active}
+                        onChange={() => this.handleSliderClick(index)}
+                      />
+                      <span className="slider round"></span>
+                    </label>
+                    <button
+                      className="delete-btn"
+                      onClick={() => this.handleDeleteSector(index)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+                {this.state.additionalInfo[index]?.show && (
                   <div className="additional-info">
-                    <h4>Personnel:</h4>
+                    <p>Date: {sector.date}</p>
+                    <p>Time: {sector.startTime} - {sector.endTime}</p>
+                    <p>Personnel Assigned:</p>
                     <ul>
-                      {Object.values(this.state.additionalInfo[index]?.data.personnel).map(
-                        (personId, personIndex) => (
-                          <li key={personIndex}>{this.state.personnelData[personId]?.name}</li>
-                        )
-                      )}
+                      {Object.entries(this.state.additionalInfo[index]?.data.personnel || {}).map(([id, person]) => (
+                        <li key={id}>{person.name}</li>
+                      ))}
                     </ul>
                   </div>
                 )}
-            </div>
-          ))}
-        </div>
+                {this.state.countdowns[index] && (
+                  <div className="countdown">{this.state.countdowns[index]}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }
