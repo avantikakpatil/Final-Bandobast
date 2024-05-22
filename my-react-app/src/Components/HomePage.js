@@ -1,37 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from './Navbar'; // Import Navbar component
 import MainContent from './MainContent'; // Import MainContent component
 import Header from './Header';
 import Notification from './Notification';
+import { db } from '../config/firebaseConfig';
+import { ref, onValue } from 'firebase/database';
 
-class HomePage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      notifications: []
-    };
-  }
+const HomePage = () => {
+  const [notifications, setNotifications] = useState([]);
 
-  addNotification = (message) => {
-    this.setState(prevState => ({
-      notifications: [...prevState.notifications, { id: Date.now(), message }]
-    }));
-  };
+  useEffect(() => {
+    const notificationsRef = ref(db, 'notifications');
+    onValue(notificationsRef, (snapshot) => {
+      const notificationsData = snapshot.val();
+      if (notificationsData) {
+        const notificationsArray = Object.values(notificationsData);
+        setNotifications(notificationsArray);
+      }
+    }, (error) => {
+      console.error("Error fetching notifications:", error);
+    });
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <Header /> {/* Include Header component */}
-        <div className="dashboard">
-          <Navbar />
-          <div className="content">
-            <MainContent />
-            <Notification notifications={this.state.notifications} />
-          </div>
+  return (
+    <div>
+      <Header /> {/* Include Header component */}
+      <div className="dashboard">
+        <Navbar />
+        <div className="content">
+          <MainContent />
+          <Notification notifications={notifications} />
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default HomePage;

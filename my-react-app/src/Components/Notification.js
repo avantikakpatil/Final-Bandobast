@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Notification.css';
 
 class Notification extends React.Component {
   state = {
     notifications: []
   };
+
+  componentDidMount() {
+    this.setState({ notifications: this.props.notifications });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.notifications !== this.props.notifications) {
+      this.setState({ notifications: this.props.notifications });
+    }
+  }
 
   addNotification = (message) => {
     const newNotification = {

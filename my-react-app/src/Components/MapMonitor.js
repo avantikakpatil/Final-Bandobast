@@ -19,6 +19,7 @@ const MapMonitor = () => {
   const notificationIdCounterRef = useRef(0);
   const [activeSectors, setActiveSectors] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [existingNotifications, setExistingNotifications] = useState(new Set());
 
   useEffect(() => {
     const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -48,6 +49,20 @@ const MapMonitor = () => {
     return () => {
       map.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    const notificationsRef = ref(db, 'notifications');
+    onValue(notificationsRef, (snapshot) => {
+      const notificationsData = snapshot.val();
+      if (notificationsData) {
+        const notificationsArray = Object.values(notificationsData);
+        setNotifications(notificationsArray);
+        setExistingNotifications(new Set(notificationsArray.map(notification => notification.message)));
+      }
+    }, (error) => {
+      console.error("Error fetching notifications:", error);
+    });
   }, []);
 
   useEffect(() => {
@@ -95,51 +110,67 @@ const MapMonitor = () => {
 
       if (personnel) {
         Object.entries(personnel).forEach(([personId, person]) => {
-          const { latitude, longitude, title } = person;
-          const personnelMarker = L.marker([latitude, longitude], { icon: personnelMarkerIcon }).addTo(mapRef.current);
-          const radiusCircle = L.circle([latitude, longitude], {
-            radius: 10,
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-          }).addTo(mapRef.current);
+          const { latitude, longitude, deviceId } = person;
+          
+          // Fetch personnel details from Firebase based on personId
+          const personnelRef = ref(db, `personnel/${personId}`);
+          onValue(personnelRef, (snapshot) => {
+            const personnelData = snapshot.val();
+            const name = personnelData ? personnelData.name : "Undefined";
 
-          personnelMarker.bindPopup(title || 'Personnel');
-          layersRef.current.push(personnelMarker);
-          layersRef.current.push(radiusCircle);
-          personnelMarkersRef.current[personId] = personnelMarker;
-
-          // Check if personnel is outside the sector area
-          if (circle) {
-            const distance = L.latLng(latitude, longitude).distanceTo(circle.center);
-            console.log(`${title} distance from sector center: ${distance}, allowed radius: ${circle.radius}`);
-            if (distance > circle.radius) {
-              console.log(`${title} is out of the sector area for ${sector.title}.`);
-              const notification = { id: notificationIdCounterRef.current++, message: `${title} is out of the sector area for ${sector.title}.` };
-              setNotifications(prevNotifications => [...prevNotifications, notification]);
-
-              // Store notification in Firebase
-              const newNotificationRef = push(ref(db, 'notifications'));
-              set(newNotificationRef, notification);
+            const personnelMarker = L.marker([latitude, longitude], { icon: personnelMarkerIcon }).addTo(mapRef.current);
+            const radiusCircle = L.circle([latitude, longitude], {
+              radius: 10,
+              color: 'red',
+              fillColor: '#f03',
+              fillOpacity: 0.5,
+            }).addTo(mapRef.current);
+  
+            personnelMarker.bindPopup(name || title || 'Personnel'); // Use 'name' instead of 'undefined'
+            layersRef.current.push(personnelMarker);
+            layersRef.current.push(radiusCircle);
+            personnelMarkersRef.current[personId] = personnelMarker;
+  
+            // Check if personnel is outside the sector area
+            if (circle) {
+              const distance = L.latLng(latitude, longitude).distanceTo(circle.center);
+              console.log(`${name} distance from sector center: ${distance}, allowed radius: ${circle.radius}`); // Use 'name' instead of 'title'
+              if (distance > circle.radius) {
+                console.log(`${name} is out of the sector area for ${sector.title}.`);
+                const message = `${name} is out of the sector area for ${sector.title}.`;
+                if (!existingNotifications.has(message)) {
+                  const notification = { id: notificationIdCounterRef.current++, message };
+                  setNotifications(prevNotifications => [...prevNotifications, notification]);
+                  setExistingNotifications(prev => new Set(prev).add(message));
+                  
+                  // Store notification in Firebase
+                  const newNotificationRef = push(ref(db, 'notifications'));
+                  set(newNotificationRef, notification);
+                }
+              }
+            } else if (polygon || rectangle) {
+              const polygonLayer = L.geoJSON(polygon || rectangle);
+              const personnelLocation = L.latLng(latitude, longitude);
+              console.log(`${name} location: ${personnelLocation.toString()}, sector bounds: ${polygonLayer.getBounds().toString()}`);
+              if (!polygonLayer.getBounds().contains(personnelLocation)) {
+                console.log(`${name} is out of the sector area for ${sector.title}.`);
+                const message = `${name} is out of the sector area for ${sector.title}.`;
+                if (!existingNotifications.has(message)) {
+                  const notification = { id: notificationIdCounterRef.current++, message };
+                  setNotifications(prevNotifications => [...prevNotifications, notification]);
+                  setExistingNotifications(prev => new Set(prev).add(message));
+                  
+                  // Store notification in Firebase
+                  const newNotificationRef = push(ref(db, 'notifications'));
+                  set(newNotificationRef, notification);
+                }
+              }
             }
-          } else if (polygon || rectangle) {
-            const polygonLayer = L.geoJSON(polygon || rectangle);
-            const personnelLocation = L.latLng(latitude, longitude);
-            console.log(`${title} location: ${personnelLocation.toString()}, sector bounds: ${polygonLayer.getBounds().toString()}`);
-            if (!polygonLayer.getBounds().contains(personnelLocation)) {
-              console.log(`${title} is out of the sector area for ${sector.title}.`);
-              const notification = { id: notificationIdCounterRef.current++, message: `${title} is out of the sector area for ${sector.title}.` };
-              setNotifications(prevNotifications => [...prevNotifications, notification]);
-
-              // Store notification in Firebase
-              const newNotificationRef = push(ref(db, 'notifications'));
-              set(newNotificationRef, notification);
-            }
-          }
+          });
         });
       }
     });
-  }, [activeSectors]);
+  }, [activeSectors, existingNotifications]);
 
   const handleCloseNotification = (id) => {
     setNotifications(notifications.filter(notification => notification.id !== id));
@@ -148,7 +179,6 @@ const MapMonitor = () => {
   return (
     <div>
       <div id="map" style={{ height: '600px' }} />
-      <Notification notifications={notifications} onCloseNotification={handleCloseNotification} />
     </div>
   );
 };
