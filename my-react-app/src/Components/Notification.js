@@ -1,29 +1,52 @@
-// In the Notification component
-
 import React from 'react';
 import './Notification.css';
 
-const Notification = ({ notifications = [] }) => {
-  return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <h3>Notifications</h3>
+class Notification extends React.Component {
+  state = {
+    notifications: []
+  };
+
+  addNotification = (message) => {
+    const newNotification = {
+      id: Date.now(),
+      message
+    };
+    this.setState((prevState) => ({
+      notifications: [...prevState.notifications, newNotification]
+    }));
+
+    // Automatically remove the notification after 5 seconds
+    setTimeout(() => {
+      this.removeNotification(newNotification.id);
+    }, 5000);
+  };
+
+  removeNotification = (id) => {
+    this.setState((prevState) => ({
+      notifications: prevState.notifications.filter(notification => notification.id !== id)
+    }));
+  };
+
+  render() {
+    return (
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h3>Notifications</h3>
+        </div>
+        <ul>
+          {this.state.notifications.map(notification => (
+            <li
+              key={notification.id}
+              className={`notification-item ${notification.message.includes("is out of the sector area") ? "out-of-area" : ""}`}
+            >
+              <div className="notification-message">{notification.message}</div>
+              <div className="notification-close" onClick={() => this.removeNotification(notification.id)}>✖</div>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul>
-        {notifications.map(notification => (
-          <li
-            key={notification.id}
-            className={`notification-item ${notification.message.includes("is out of the sector area") ? "out-of-area" : ""}`}
-          >
-            <div className="notification-message">{notification.message}</div>
-            <div className="notification-close">✖</div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-
+    );
+  }
+}
 
 export default Notification;
