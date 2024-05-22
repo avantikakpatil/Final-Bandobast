@@ -264,7 +264,7 @@ const Map = () => {
           borderRadius: '5px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)', zIndex: 1000
         }}>
           <button style={{
-            position: 'absolute', top: '5px', right: '5px', border: 'none',
+            position: 'absolute', top: '5px', right: '5px', border: 'none',color:'black',
             background: 'none', cursor: 'pointer', fontSize: '1.2em'
           }} onClick={handleCloseForm}>×</button>
           <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Bandobast</h2>
@@ -276,7 +276,7 @@ const Map = () => {
               <input type="text" name="title" value={bandobastDetails.title}
                 onChange={(e) => setBandobastDetails({ ...bandobastDetails, title: e.target.value })}
                 style={{
-                  width: '100%', padding: '8px', marginBottom: '10px',
+                  width: '500px', padding: '8px', marginBottom: '10px',
                   borderRadius: '5px', border: '1px solid #ccc'
                 }} />
             </div>
@@ -284,7 +284,7 @@ const Map = () => {
               <label>Select the Ground Personnel:</label>
               <select name="personnel" multiple value={bandobastDetails.personnel} onChange={handleSelectPersonnel}
                 style={{
-                  width: '100%', height: '100px', padding: '8px', marginBottom: '10px',
+                  width: '500px', height: '100px', padding: '8px', marginBottom: '10px',
                   borderRadius: '5px', border: '1px solid #ccc'
                 }}>
                 {personnelOptions.map(option => (
@@ -297,7 +297,7 @@ const Map = () => {
               <input type="date" name="date" value={bandobastDetails.date}
                 onChange={(e) => setBandobastDetails({ ...bandobastDetails, date: e.target.value })}
                 style={{
-                  width: '100%', padding: '8px', marginBottom: '10px',
+                  width: '500px', padding: '8px', marginBottom: '10px',
                   borderRadius: '5px', border: '1px solid #ccc'
                 }} />
             </div>
@@ -306,7 +306,7 @@ const Map = () => {
               <input type="time" name="startTime" value={bandobastDetails.startTime}
                 onChange={(e) => setBandobastDetails({ ...bandobastDetails, startTime: e.target.value })}
                 style={{
-                  width: '100%', padding: '8px', marginBottom: '10px',
+                  width: '500px', padding: '8px', marginBottom: '10px',
                   borderRadius: '5px', border: '1px solid #ccc'
                 }} />
             </div>
@@ -315,7 +315,7 @@ const Map = () => {
               <input type="time" name="endTime" value={bandobastDetails.endTime}
                 onChange={(e) => setBandobastDetails({ ...bandobastDetails, endTime: e.target.value })}
                 style={{
-                  width: '100%', padding: '8px', marginBottom: '10px',
+                  width: '500px', padding: '8px', marginBottom: '10px',
                   borderRadius: '5px', border: '1px solid #ccc'
                 }} />
             </div>
