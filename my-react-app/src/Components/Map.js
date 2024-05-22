@@ -321,7 +321,7 @@ const Map = () => {
             </div>
             <button type="submit" style={{
               width: '100%', padding: '10px', borderRadius: '5px',
-              border: 'none', backgroundColor: '#4CAF50', color: 'white', cursor: 'pointer'
+              border: 'none', backgroundColor: '#007bff', color: 'white', cursor: 'pointer'
             }}>Save</button>
           </form>
         </div>

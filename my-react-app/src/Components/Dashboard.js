@@ -10,7 +10,7 @@ class Dashboard extends React.Component {
         <Header /> 
         <div className="dashboard">
           <Navbar />
-          <div className="content">
+          <div className="content" style={{padding : 0}}>
           <MainContent />
             <Sidebar />
           </div>
