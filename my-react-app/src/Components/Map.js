@@ -105,7 +105,7 @@ const Map = () => {
       const bandobastData = snapshot.val();
       if (bandobastData) {
         Object.values(bandobastData).forEach(sector => {
-          const { coordinates, title, circle } = sector;
+          const { coordinates, title, circle, personnel } = sector;
           if (circle) {
             const { center, radius } = circle;
             const circleLayer = L.circle(center, { radius }).addTo(mapRef.current);
@@ -122,6 +122,18 @@ const Map = () => {
               addPopupToSector(sectorLayer, title);
             });
           }
+          if (personnel) {
+            Object.values(personnel).forEach(person => {
+              const marker = L.marker([person.latitude, person.longitude], {
+                icon: new L.Icon({
+                  iconUrl: customMarkerIcon,
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 32],
+                })
+              }).addTo(mapRef.current);
+              marker.bindPopup(person.name);
+            });
+          }
         });
       }
     });
@@ -135,17 +147,6 @@ const Map = () => {
           label: personnelData[key].name
         }));
         setPersonnelOptions(options);
-
-        Object.values(personnelData).forEach(person => {
-          const marker = L.marker([person.latitude, person.longitude], {
-            icon: new L.Icon({
-              iconUrl: customMarkerIcon,
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-            })
-          }).addTo(mapRef.current);
-          marker.bindPopup(person.name);
-        });
       }
     });
 
@@ -153,16 +154,6 @@ const Map = () => {
       map.remove();
     };
   }, []);
-
-  useEffect(() => {
-    drawnLayers.forEach(layer => {
-      const name = layer.options.name;
-      if (name) {
-        const tooltip = L.tooltip({ permanent: true, direction: 'center', className: 'custom-tooltip' }).setContent(name);
-        layer.bindTooltip(tooltip).openTooltip();
-      }
-    });
-  }, [drawnLayers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -223,12 +214,12 @@ const Map = () => {
     }));
   };
 
-  const handleCloseForm = () => {
+  const handleCloseForm =() => {
     setShowForm(false);
   };
 
   useEffect(() => {
-    const updatePersonnelLocations = () => {
+    const updatePersonnelLocations = async () => {
       const deviceDetailsRef = ref(db, 'DeviceDetails/100');
       onValue(deviceDetailsRef, async (snapshot) => {
         const { latitude, longitude } = snapshot.val();
