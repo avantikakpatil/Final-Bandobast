@@ -21,8 +21,8 @@ const BandobastReport = () => {
         fetchPersonnelNames(details);
       } else {
         setBandobastDetails([]);
+        setLoading(false);
       }
-      setLoading(false);
     }, (error) => {
       console.error('Error fetching bandobast details:', error);
       setLoading(false);
@@ -39,10 +39,15 @@ const BandobastReport = () => {
         const updatedDetails = details.map((detail) => {
           const personnelIds = Object.keys(detail.personnel || {});
           const personnelNames = personnelIds.map((personnelId) => personnelData[personnelId]?.name || 'N/A');
-          return { ...detail, personnelNames: personnelNames };
+          const personnelArray = personnelIds.map((personnelId) => ({
+            ...personnelData[personnelId],
+            id: personnelId
+          }));
+          return { ...detail, personnelNames, personnelArray };
         });
         setBandobastDetails(updatedDetails);
       }
+      setLoading(false);
     });
   };
 
@@ -63,7 +68,7 @@ const BandobastReport = () => {
     // List of Personnel names that are assigned
     let personnelListText = 'List of Personnel Assigned:\n';
     if (detail.personnel) {
-      Object.values(detail.personnel).forEach((personnel, index) => {
+      detail.personnelArray.forEach((personnel, index) => {
         personnelListText += `${index + 1}. ${personnel.name || 'N/A'} (${personnel.position || 'N/A'})\n`;
       });
     } else {
@@ -72,8 +77,8 @@ const BandobastReport = () => {
     doc.text(personnelListText, 10, 90);
 
     // Number of personnel outside and inside show in pie chart
-    const personnelInside = Object.values(detail.personnel || {}).filter(personnel => !personnel.outside).length;
-    const personnelOutside = Object.values(detail.personnel || {}).filter(personnel => personnel.outside).length;
+    const personnelInside = detail.personnelArray.filter(personnel => !personnel.outside).length;
+    const personnelOutside = detail.personnelArray.filter(personnel => personnel.outside).length;
     doc.addImage(getPieChart(personnelInside, personnelOutside), 'PNG', 120, 110, 80, 80);
 
     // Date of Printing
@@ -136,7 +141,7 @@ const BandobastReport = () => {
                     <tr key={detail.id}>
                       <td>{index + 1}</td>
                       <td>{detail.title}</td>
-                      <td>{detail.personnel ? Object.keys(detail.personnel).length : 0}</td>
+                      <td>{detail.personnelNames.join(', ')}</td>
                       <td>{detail.movedOut || 0}</td>
                       <td>{detail.additionalInfo || 'N/A'}</td>
                       <td>
@@ -162,7 +167,7 @@ const BandobastReport = () => {
             <p><strong>List of Personnel Assigned:</strong></p>
             <ul>
               {viewDetail.personnel ? (
-                Object.values(viewDetail.personnel).map((personnel, index) => (
+                viewDetail.personnelArray.map((personnel, index) => (
                   <li key={index}>{personnel.name || 'N/A'} ({personnel.position || 'N/A'})</li>
                 ))
               ) : (
