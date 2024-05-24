@@ -88,15 +88,24 @@ const MapMonitor = () => {
       if (circle) {
         layer = L.circle(circle.center, { radius: circle.radius }).addTo(mapRef.current);
       } else if (polygon) {
-        layer = L.geoJSON(polygon).addTo(mapRef.current);
+        // Ensure the polygon coordinates form a closed loop
+        const closedPolygonCoordinates = [...polygon.geometry.coordinates[0], polygon.geometry.coordinates[0][0]];
+        const polygonGeoJSON = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [closedPolygonCoordinates]
+          }
+        };
+        layer = L.geoJSON(polygonGeoJSON).addTo(mapRef.current);
       } else if (rectangle) {
-        // Ensure the coordinates form a closed loop
-        const closedCoordinates = [...rectangle.geometry.coordinates[0], rectangle.geometry.coordinates[0][0]];
+        // Ensure the rectangle coordinates form a closed loop
+        const closedRectangleCoordinates = [...rectangle.geometry.coordinates, rectangle.geometry.coordinates[0]];
         const rectangleGeoJSON = {
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [closedCoordinates]
+            coordinates: [closedRectangleCoordinates]
           }
         };
         layer = L.geoJSON(rectangleGeoJSON).addTo(mapRef.current);

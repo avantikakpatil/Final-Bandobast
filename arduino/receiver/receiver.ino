@@ -8,6 +8,7 @@
 
 const char *firebaseHost = "final-band-o-bast-default-rtdb.firebaseio.com";
 const char *firebaseAuth = "AIzaSyDlodufxD85YZO35-RX0qk3teTsMNV7kVE";
+
 void setup() {
   Serial.begin(9600);
   while (!Serial);
@@ -22,7 +23,7 @@ void setup() {
     while (1);
   }
 
-  WiFi.begin("realme 7", "11223344"); // Replace with your WiFi SSID and password
+  WiFi.begin("Kiran", "kiran2710"); // Replace with your WiFi SSID and password
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi...");
