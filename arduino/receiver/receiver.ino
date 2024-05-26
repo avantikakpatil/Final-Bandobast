@@ -23,7 +23,7 @@ void setup() {
     while (1);
   }
 
-  WiFi.begin("Kiran", "kiran2710"); // Replace with your WiFi SSID and password
+  WiFi.begin("Smruti", "12345678"); // Replace with your WiFi SSID and password
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi...");
